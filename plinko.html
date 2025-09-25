@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plinko - Can U Be</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">Light</button>
+    
+    <div class="container center">
+        <h1>Plinko</h1>
+        
+        <a href="index.html" class="nav-link">← Back</a>
+        
+        <div class="score">Score: <span id="score">0</span></div>
+        <div class="controls">Click anywhere above the board to drop a ball</div>
+        
+        <canvas id="plinkoCanvas" width="400" height="600"></canvas>
+        
+        <button class="game-button" onclick="resetGame()">Reset Game</button>
+        
+        <div class="footer">
+            Website made by @bus0
+        </div>
+    </div>
+    
+    <script src="theme.js"></script>
+    <script>
+        const canvas = document.getElementById('plinkoCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+
+        // Game state
+        let score = 0;
+        let balls = [];
+        let pegs = [];
+        let slots = [];
+        let isAnimating = false;
+
+        // Physics constants
+        const GRAVITY = 0.3;
+        const BOUNCE = 0.7;
+        const FRICTION = 0.99;
+        const BALL_RADIUS = 8;
+        const PEG_RADIUS = 4;
+
+        // Initialize game board
+        function initializeGame() {
+            // Create pegs in triangular pattern
+            pegs = [];
+            const pegRows = 8;
+            const pegSpacing = 40;
+            const startY = 80;
+            
+            for (let row = 0; row < pegRows; row++) {
+                const pegsInRow = row + 3;
+                const rowWidth = (pegsInRow - 1) * pegSpacing;
+                const startX = (canvas.width - rowWidth) / 2;
+                
+                for (let col = 0; col < pegsInRow; col++) {
+                    pegs.push({
+                        x: startX + col * pegSpacing,
+                        y: startY + row * 60,
+                        radius: PEG_RADIUS
+                    });
+                }
+            }
+            
+            // Create scoring slots at bottom
+            slots = [];
+            const slotCount = 7;
+            const slotWidth = canvas.width / slotCount;
+            const slotValues = [100, 500, 1000, 5000, 1000, 500, 100];
+            
+            for (let i = 0; i < slotCount; i++) {
+                slots.push({
+                    x: i * slotWidth,
+                    y: canvas.height - 60,
+                    width: slotWidth,
+                    height: 60,
+                    value: slotValues[i]
+                });
+            }
+        }
+
+        // Ball object
+        class Ball {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 2; // Small random horizontal velocity
+                this.vy = 0;
+                this.radius = BALL_RADIUS;
+                this.active = true;
+            }
+
+            update() {
+                if (!this.active) return;
+
+                // Apply gravity
+                this.vy += GRAVITY;
+                
+                // Apply friction
+                this.vx *= FRICTION;
+                this.vy *= FRICTION;
+                
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Check peg collisions
+                pegs.forEach(peg => {
+                    const dx = this.x - peg.x;
+                    const dy = this.y - peg.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < this.radius + peg.radius) {
+                        // Calculate collision response
+                        const angle = Math.atan2(dy, dx);
+                        const sin = Math.sin(angle);
+                        const cos = Math.cos(angle);
+                        
+                        // Separate ball from peg
+                        const overlap = this.radius + peg.radius - distance;
+                        this.x += cos * overlap;
+                        this.y += sin * overlap;
+                        
+                        // Bounce off peg
+                        const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                        this.vx = cos * speed * BOUNCE;
+                        this.vy = sin * speed * BOUNCE;
+                        
+                        // Add some randomness
+                        this.vx += (Math.random() - 0.5) * 2;
+                    }
+                });
+                
+                // Check walls
+                if (this.x - this.radius < 0) {
+                    this.x = this.radius;
+                    this.vx = Math.abs(this.vx) * BOUNCE;
+                }
+                if (this.x + this.radius > canvas.width) {
+                    this.x = canvas.width - this.radius;
+                    this.vx = -Math.abs(this.vx) * BOUNCE;
+                }
+                
+                // Check if ball reached bottom
+                if (this.y + this.radius > canvas.height - 60) {
+                    this.checkSlotScore();
+                    this.active = false;
+                }
+            }
+
+            checkSlotScore() {
+                const slotIndex = Math.floor(this.x / (canvas.width / slots.length));
+                if (slotIndex >= 0 && slotIndex < slots.length) {
+                    score += slots[slotIndex].value;
+                    scoreElement.textContent = score;
+                }
+            }
+
+            draw() {
+                if (!this.active) return;
+                
+                const colors = getThemeColors();
+                ctx.fillStyle = colors.fg;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Get current theme colors
+        function getThemeColors() {
+            const isLight = document.body.getAttribute('data-theme') === 'light';
+            return {
+                bg: isLight ? '#fff' : '#000',
+                fg: isLight ? '#000' : '#fff'
+            };
+        }
+
+        // Draw game elements
+        function draw() {
+            const colors = getThemeColors();
+            
+            // Clear canvas
+            ctx.fillStyle = colors.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw pegs
+            ctx.fillStyle = colors.fg;
+            pegs.forEach(peg => {
+                ctx.beginPath();
+                ctx.arc(peg.x, peg.y, peg.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw slots
+            ctx.strokeStyle = colors.fg;
+            ctx.lineWidth = 2;
+            ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = colors.fg;
+            
+            slots.forEach(slot => {
+                ctx.strokeRect(slot.x, slot.y, slot.width, slot.height);
+                ctx.fillText(slot.value.toString(), slot.x + slot.width / 2, slot.y + 30);
+            });
+            
+            // Draw balls
+            balls.forEach(ball => ball.draw());
+        }
+
+        // Game loop
+        function gameLoop() {
+            // Update balls
+            balls.forEach(ball => ball.update());
+            
+            // Remove inactive balls
+            balls = balls.filter(ball => ball.active);
+            
+            // Check if animation should stop
+            if (balls.length === 0) {
+                isAnimating = false;
+            }
+            
+            draw();
+            
+            if (isAnimating) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // Drop ball
+        function dropBall(x) {
+            const ball = new Ball(x, 20);
+            balls.push(ball);
+            
+            if (!isAnimating) {
+                isAnimating = true;
+                gameLoop();
+            }
+        }
+
+        // Reset game
+        function resetGame() {
+            score = 0;
+            scoreElement.textContent = score;
+            balls = [];
+            isAnimating = false;
+            draw();
+        }
+
+        // Mouse click handler
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            
+            console.log('Click detected at:', x, y); // Debug log
+            
+            // Drop ball anywhere on click (removed y restriction for testing)
+            dropBall(x);
+        });
+
+        // Initialize and start
+        initializeGame();
+        draw();
+    </script>
+</body>
+</html>

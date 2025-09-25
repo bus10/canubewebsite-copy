@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 Not Found</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .notfound {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .notfound h1 {
+      font-size: 64px;
+      margin-bottom: 24px;
+      letter-spacing: -2px;
+    }
+    .notfound p {
+      font-size: 20px;
+      margin-bottom: 32px;
+      opacity: 0.7;
+    }
+    .notfound a {
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 10px 20px;
+      text-decoration: none;
+      text-transform: uppercase;
+      font-size: 14px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .notfound a:hover {
+      background: var(--text-color);
+      color: var(--bg-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="notfound">
+    <h1>404</h1>
+    <p>Page not found.</p>
+    <a href="index.html">Go Home</a>
+  </div>
+</body>
+</html>

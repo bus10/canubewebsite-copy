@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can U Be</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">Light</button>
+    
+    <div id="loader"></div>
+    
+    <div class="container center">
+        <h1>Can U Be</h1>
+        
+        <a href="index.html" class="nav-link">← Back</a>
+        
+        <audio controls>
+            <source src="canube.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        
+        <div class="footer">
+            Website made by @bus0
+        </div>
+    </div>
+    
+    <script src="theme.js"></script>
+    <script>
+        var audio = document.querySelector('audio');
+        var loader = document.getElementById('loader');
+        var container = document.querySelector('.container');
+
+        audio.addEventListener('canplaythrough', function() {
+            loader.style.display = 'none';
+            container.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

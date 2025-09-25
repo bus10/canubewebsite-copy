@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BENEVOLENT INEQUALITY</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">Light</button>
+    
+    <div id="loader"></div>
+    
+    <div class="container center">
+        <h1 class="hero-title">BENEVOLENT INEQUALITY</h1>
+        
+        <a href="index.html" class="nav-link">← Back</a>
+        
+        <div class="artwork-container">
+            <img id="artwork" src="" alt="Album Artwork" class="artwork">
+        </div>
+        
+        <div class="song-info">
+            <div class="day-indicator">Today: <span id="dayName"></span></div>
+            <div class="song-title" id="songTitle"></div>
+        </div>
+        
+        <audio controls id="audioPlayer">
+            <source id="audioSource" src="" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        
+        <div class="footer">
+            Website made by @bus0
+        </div>
+    </div>
+    
+    <script src="theme.js"></script>
+    <script>
+        // Song rotation based on day of week
+        const songs = [
+            { title: "with love", file: "with love.wav" },                    // Sunday (0)
+            { title: "my love, your love", file: "my love, your love demo.wav" }, // Monday (1)
+            { title: "had it back to", file: "9:19 had itback.wav" },         // Tuesday (2)
+            { title: "i can't do this", file: "9:19 i cant do this.wav" },    // Wednesday (3)
+            { title: "with love", file: "with love.wav" },                    // Thursday (4)
+            { title: "my love, your love", file: "my love, your love demo.wav" }, // Friday (5)
+            { title: "had it back to", file: "9:19 had itback.wav" }          // Saturday (6)
+        ];
+        
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        
+        function loadTodaysSong() {
+            const today = new Date();
+            const dayIndex = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const currentSong = songs[dayIndex];
+            
+            // Update day indicator
+            document.getElementById('dayName').textContent = dayNames[dayIndex];
+            
+            // Update song title
+            document.getElementById('songTitle').textContent = currentSong.title.toUpperCase();
+            
+            // Update audio source
+            const audioSource = document.getElementById('audioSource');
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioSource.src = currentSong.file;
+            audioSource.type = "audio/wav"; // Update to wav format
+            audioPlayer.load();
+            
+            // Set the single artwork for all songs
+            const artwork = document.getElementById('artwork');
+            artwork.src = "Benevolent Inequality-artwork.jpeg";
+            artwork.alt = "BENEVOLENT INEQUALITY artwork";
+            
+            // Simplified loading - only wait for audio
+            const loader = document.getElementById('loader');
+            const container = document.querySelector('.container');
+            
+            audioPlayer.addEventListener('canplaythrough', function() {
+                loader.style.display = 'none';
+                container.style.display = 'block';
+            });
+        }
+        
+        // Load today's song when page loads
+        loadTodaysSong();
+        
+        // Debug: Show what day and song should be playing
+        console.log(`Today is ${dayNames[new Date().getDay()]}, playing: ${songs[new Date().getDay()].title}`);
+    </script>
+</body>
+</html>
