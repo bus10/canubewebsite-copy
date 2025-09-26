@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BENEVOLENT INEQUALITY</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -40,13 +40,13 @@
     <script>
         // Song rotation based on day of week
         const songs = [
-            { title: "with love", file: "with love.wav" },                    // Sunday (0)
-            { title: "my love, your love", file: "my love, your love demo.wav" }, // Monday (1)
-            { title: "had it back to", file: "9:19 had itback.wav" },         // Tuesday (2)
-            { title: "i can't do this", file: "9:19 i cant do this.wav" },    // Wednesday (3)
-            { title: "with love", file: "with love.wav" },                    // Thursday (4)
-            { title: "my love, your love", file: "my love, your love demo.wav" }, // Friday (5)
-            { title: "had it back to", file: "9:19 had itback.wav" }          // Saturday (6)
+            { title: "with love", file: "audio/with love.wav" },                    // Sunday (0)
+            { title: "my love, your love", file: "audio/my love, your love demo.wav" }, // Monday (1)
+            { title: "had it back to", file: "audio/9:19 had itback.wav" },         // Tuesday (2)
+            { title: "i can't do this", file: "audio/9:19 i cant do this.wav" },    // Wednesday (3)
+            { title: "with love", file: "audio/with love.wav" },                    // Thursday (4)
+            { title: "my love, your love", file: "audio/my love, your love demo.wav" }, // Friday (5)
+            { title: "had it back to", file: "audio/9:19 had itback.wav" }          // Saturday (6)
         ];
         
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -71,7 +71,7 @@
             
             // Set the single artwork for all songs
             const artwork = document.getElementById('artwork');
-            artwork.src = "Benevolent Inequality-artwork.jpeg";
+            artwork.src = "images/Benevolent Inequality-artwork.jpeg";
             artwork.alt = "BENEVOLENT INEQUALITY artwork";
             
             // Simplified loading - only wait for audio
