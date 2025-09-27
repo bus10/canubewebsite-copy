@@ -39,14 +39,15 @@
     <script src="theme.js"></script>
     <script>
         // Song rotation based on day of week
+        // Updated to compressed mp3 assets with filename-safe naming (convert locally before deploying)
         const songs = [
-            { title: "with love", file: "audio/with love.wav" },                    // Sunday (0)
-            { title: "my love, your love", file: "audio/my love, your love demo.wav" }, // Monday (1)
-            { title: "had it back to", file: "audio/9:19 had itback.wav" },         // Tuesday (2)
-            { title: "i can't do this", file: "audio/9:19 i cant do this.wav" },    // Wednesday (3)
-            { title: "with love", file: "audio/with love.wav" },                    // Thursday (4)
-            { title: "my love, your love", file: "audio/my love, your love demo.wav" }, // Friday (5)
-            { title: "had it back to", file: "audio/9:19 had itback.wav" }          // Saturday (6)
+            { title: "with love", file: "audio/with-love.mp3" },               // Sunday (0)
+            { title: "my love, your love", file: "audio/my-love-your-love-demo.mp3" }, // Monday (1)
+            { title: "had it back to", file: "audio/9-19-had-itback.mp3" },    // Tuesday (2)
+            { title: "i can't do this", file: "audio/9-19-i-cant-do-this.mp3" }, // Wednesday (3)
+            { title: "with love", file: "audio/with-love.mp3" },               // Thursday (4)
+            { title: "my love, your love", file: "audio/my-love-your-love-demo.mp3" }, // Friday (5)
+            { title: "had it back to", file: "audio/9-19-had-itback.mp3" }     // Saturday (6)
         ];
         
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -66,7 +67,7 @@
             const audioSource = document.getElementById('audioSource');
             const audioPlayer = document.getElementById('audioPlayer');
             audioSource.src = currentSong.file;
-            audioSource.type = "audio/wav"; // Update to wav format
+            audioSource.type = "audio/mpeg"; // mp3 compressed format
             audioPlayer.load();
             
             // Set the single artwork for all songs
