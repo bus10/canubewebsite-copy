@@ -258,12 +258,62 @@ audio {
 /* Performance: image/audio hints */
 img, audio, video {
     content-visibility: auto;
-    loading: auto;
 }
 
 /* Minimal Animations */
 .theme-toggle, .game-button, .nav-link, .artwork, .footer {
     transition: background 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+/* Podcast Page Styles */
+.subtitle {
+    font-size: 24px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 60px;
+    opacity: 0.8;
+}
+
+.coming-soon {
+    margin: 80px 0;
+}
+
+.status-text {
+    font-size: 32px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 40px;
+    border: 2px solid var(--border-color);
+    padding: 20px 40px;
+    display: inline-block;
+}
+
+.description {
+    font-size: 16px;
+    line-height: 1.6;
+    opacity: 0.7;
+    margin-top: 40px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+@media (max-width: 600px) {
+    .status-text {
+        font-size: 24px;
+        padding: 15px 25px;
+        letter-spacing: 1px;
+    }
+    
+    .subtitle {
+        font-size: 18px;
+    }
+    
+    .description {
+        font-size: 14px;
+        padding: 0 10px;
+    }
 }
 
 /* Keyboard Accessibility */
