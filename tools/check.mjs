@@ -502,6 +502,37 @@ test('focus:type-case', () => withPage('type', {}, async ({ page }) => {
     assert(tt === 'none', 'words are being uppercased (text-transform: ' + tt + ')');
 }));
 
+// ---- Task 7: Time Machine + 404 ----
+shellTests('tm');
+shellTests('notfound');
+
+test('tm:rows', () => withPage('tm', {}, async ({ page }) => {
+    const rows = await page.$$eval('.index-row', els => els.map(e => [
+        e.getAttribute('href'),
+        e.querySelector('.index-num').textContent.trim(),
+        e.querySelector('.index-title-text').textContent.trim(),
+    ]));
+    const expected = [
+        ['time-machine/CUB-V1/index.html', 'V1', 'AUGUST 2024'],
+        ['time-machine/CUB-V2/index.html', 'V2', 'SEPTEMBER 2024'],
+        ['time-machine/CUB-V3/index.html', 'V3', 'OCTOBER 2024'],
+    ];
+    assert(JSON.stringify(rows) === JSON.stringify(expected), 'rows: ' + JSON.stringify(rows));
+}));
+
+test('notfound:page', () => withPage('notfound', {}, async ({ page }) => {
+    const r = await page.evaluate(() => ({
+        css: !!document.querySelector('link[rel="stylesheet"][href="/styles.css"]'),
+        js: !!document.querySelector('script[src="/site.js"]'),
+        icon: !!document.querySelector('link[rel="icon"][href="/images/favicon.ico"]'),
+        home: !!document.querySelector('a.btn[href="/index.html"]'),
+    }));
+    assert(r.css && r.js && r.icon, '404 must use root-absolute asset paths: ' + JSON.stringify(r));
+    assert(r.home, '404 needs a .btn back to /index.html');
+    await page.waitForTimeout(900);
+    assert((await page.textContent('h1')) === '404', '404 heading did not settle');
+}));
+
 // ==== RUNNER ====
 async function shots() {
     const dir = path.join(ROOT, 'tools', 'shots');

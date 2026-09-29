@@ -1,24 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Time Machine</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Machine</title>
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <script>try{if(localStorage.getItem('theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <button class="theme-toggle" onclick="toggleTheme()" tabindex="0" aria-label="Toggle theme">Light</button>
-  <div class="container center">
-    <h1>Time Machine</h1>
-    <a href="index.html" class="nav-link" tabindex="0" aria-label="Back to home">← Back</a>
-    <div class="controls" style="margin-bottom:32px;">Select a past version of the site to visit:</div>
-    <div class="nav-links">
-  <a href="time-machine/CUB-V1/index.html" class="nav-link block">Version 1 (August 2024)</a>
-  <a href="time-machine/CUB-V2/index.html" class="nav-link block">Version 2 (September 2024)</a>
-  <a href="time-machine/CUB-V3/index.html" class="nav-link block">Version 3 (October 2024)</a>
-    </div>
-    <div class="footer spaced">Website made by @bus0</div>
-  </div>
-  <script src="theme.js"></script>
+    <header class="topbar">
+        <a href="index.html" class="topbar-home">CAN U BE</a>
+        <span class="live-dot" aria-hidden="true">●</span>
+        <time class="clock" aria-label="Current time">00:00:00</time>
+        <a href="index.html" class="topbar-back">← INDEX</a>
+        <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle theme">[LIGHT]</button>
+    </header>
+
+    <main class="page page--wide">
+        <div class="page-head">
+            <h1 data-scramble>TIME MACHINE</h1>
+            <p class="meta">08 / PAST VERSIONS OF THIS SITE</p>
+        </div>
+
+        <nav class="index" aria-label="Archived versions">
+            <a class="index-row" href="time-machine/CUB-V1/index.html"><span class="index-num">V1</span><span class="index-title">AUGUST 2024</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+            <a class="index-row" href="time-machine/CUB-V2/index.html"><span class="index-num">V2</span><span class="index-title">SEPTEMBER 2024</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+            <a class="index-row" href="time-machine/CUB-V3/index.html"><span class="index-num">V3</span><span class="index-title">OCTOBER 2024</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+        </nav>
+    </main>
+
+    <footer class="ticker marquee" aria-label="Website made by @bus0">
+        <div class="marquee-track"><span>WEBSITE MADE BY @BUS0&nbsp;·&nbsp;</span><span>CAN U BE&nbsp;·&nbsp;</span></div>
+    </footer>
+
+    <script src="site.js"></script>
 </body>
 </html>

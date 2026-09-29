@@ -1,49 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 Not Found</title>
-  <link rel="stylesheet" href="styles.css">
-  <style>
-    .notfound {
-      min-height: 80vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-    .notfound h1 {
-      font-size: 64px;
-      margin-bottom: 24px;
-      letter-spacing: -2px;
-    }
-    .notfound p {
-      font-size: 20px;
-      margin-bottom: 32px;
-      opacity: 0.7;
-    }
-    .notfound a {
-      color: var(--text-color);
-      border: 1px solid var(--border-color);
-      padding: 10px 20px;
-      text-decoration: none;
-      text-transform: uppercase;
-      font-size: 14px;
-      transition: background 0.2s, color 0.2s;
-    }
-    .notfound a:hover {
-      background: var(--text-color);
-      color: var(--bg-color);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Not Found</title>
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+    <script>try{if(localStorage.getItem('theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap">
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <div class="notfound">
-    <h1>404</h1>
-    <p>Page not found.</p>
-    <a href="index.html">Go Home</a>
-  </div>
+    <header class="topbar">
+        <a href="/index.html" class="topbar-home">CAN U BE</a>
+        <span class="live-dot" aria-hidden="true">●</span>
+        <time class="clock" aria-label="Current time">00:00:00</time>
+        <a href="/index.html" class="topbar-back">← INDEX</a>
+        <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle theme">[LIGHT]</button>
+    </header>
+
+    <main class="page">
+        <h1 class="hero" data-scramble>404</h1>
+        <p class="meta">PAGE NOT FOUND</p>
+        <div class="btn-row">
+            <a class="btn" href="/index.html">BACK TO INDEX</a>
+        </div>
+    </main>
+
+    <footer class="ticker marquee" aria-label="Website made by @bus0">
+        <div class="marquee-track"><span>WEBSITE MADE BY @BUS0&nbsp;·&nbsp;</span><span>CAN U BE&nbsp;·&nbsp;</span></div>
+    </footer>
+
+    <script src="/site.js"></script>
 </body>
 </html>
