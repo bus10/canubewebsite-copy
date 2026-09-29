@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snake Game - Can U Be</title>
@@ -56,12 +56,23 @@
         let score = 0;
         let gameRunning = true;
 
-        // Generate random food position
+        // Generate random food position that is NOT on the snake body
         function randomFood() {
-            food = {
-                x: Math.floor(Math.random() * tileCount),
-                y: Math.floor(Math.random() * tileCount)
-            };
+            // Build a set of occupied cells for O(1) lookup
+            const occupied = new Set(snake.map(seg => `${seg.x},${seg.y}`));
+            const freeCells = [];
+            for (let x = 0; x < tileCount; x++) {
+                for (let y = 0; y < tileCount; y++) {
+                    const key = `${x},${y}`;
+                    if (!occupied.has(key)) freeCells.push({ x, y });
+                }
+            }
+            // If no free cells remain, end game (win condition)
+            if (freeCells.length === 0) {
+                gameOver();
+                return;
+            }
+            food = freeCells[Math.floor(Math.random() * freeCells.length)];
         }
         
         // Get current theme colors
@@ -69,11 +80,16 @@
             const isLight = document.body.getAttribute('data-theme') === 'light';
             return {
                 bg: isLight ? '#fff' : '#000',
-                fg: isLight ? '#000' : '#fff'
+                fg: isLight ? '#000' : '#fff',
+                apple: isLight ? '#e74c3c' : '#ff6b6b'  // Red apple in both themes
             };
         }
 
-        // Draw everything
+        // Interpolation for smooth movement
+        let interpolation = 0;
+        let lastSnake = [...snake];
+
+        // Draw everything with smooth animations
         function draw() {
             const colors = getThemeColors();
             
@@ -81,14 +97,23 @@
             ctx.fillStyle = colors.bg;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw snake with theme foreground
+            // Draw snake with smooth interpolation
             ctx.fillStyle = colors.fg;
-            snake.forEach(segment => {
-                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+            snake.forEach((segment, index) => {
+                let drawX = segment.x;
+                let drawY = segment.y;
+                
+                // Smooth movement interpolation
+                if (interpolation < 1 && lastSnake[index]) {
+                    drawX = lastSnake[index].x + (segment.x - lastSnake[index].x) * interpolation;
+                    drawY = lastSnake[index].y + (segment.y - lastSnake[index].y) * interpolation;
+                }
+                
+                ctx.fillRect(drawX * gridSize, drawY * gridSize, gridSize - 2, gridSize - 2);
             });
 
-            // Draw food with theme foreground
-            ctx.fillStyle = colors.fg;
+            // Draw apple with distinct color
+            ctx.fillStyle = colors.apple;
             ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
         }
 
@@ -97,6 +122,10 @@
             if (!gameRunning) return;
             // Don't move if no direction is set
             if (dx === 0 && dy === 0) return;
+
+            // Save previous snake position for smooth interpolation
+            lastSnake = snake.map(seg => ({...seg}));
+            interpolation = 0;
 
             // Apply queued direction change (prevents double turns in one frame)
             if ((nextDx !== 0 || nextDy !== 0) && (dx === 0 && dy === 0 || !(nextDx === -dx && nextDy === -dy))) {
@@ -148,14 +177,27 @@
             randomFood();
         }
 
-        // Game loop
+        // Animation loop for smooth rendering
+        function animate() {
+            if (interpolation < 1) {
+                interpolation += 0.15; // Smooth step increment
+                if (interpolation > 1) interpolation = 1;
+            }
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        // Game logic loop
         function gameLoop() {
             update();
-            draw();
         }
 
         // Handle keyboard input
         document.addEventListener('keydown', (e) => {
+            // Prevent page scroll with arrow keys and spacebar
+            if (e.code === 'Space' || e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                e.preventDefault();
+            }
             if (!gameRunning && e.code === 'Space') {
                 resetGame();
                 return;
@@ -205,7 +247,8 @@
     nextDx = 0;
     nextDy = 0;
     randomFood();
-    setInterval(gameLoop, 100);
+    setInterval(gameLoop, 100);  // Game logic at 10 FPS
+    requestAnimationFrame(animate);  // Smooth rendering at 60 FPS
     </script>
 </body>
 </html>

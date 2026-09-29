@@ -1,0 +1,253 @@
+/* Type Speed Test - Brutalist Theme */
+
+:root {
+    --bg-color: #fff;
+    --text-color: #000;
+    --border-color: #000;
+}
+
+body[data-theme="dark"],
+body {
+    --bg-color: #000;
+    --text-color: #fff;
+    --border-color: #fff;
+}
+
+body[data-theme="light"] {
+    --bg-color: #fff;
+    --text-color: #000;
+    --border-color: #000;
+}
+
+.test-length-selector {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.length-btn {
+    padding: 10px 20px;
+    background: none;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: inherit;
+}
+
+.length-btn:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+.length-btn.active {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    border-color: var(--text-color);
+}
+
+.length-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.stat {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+    padding: 12px 10px;
+    border: 2px solid var(--border-color);
+}
+
+.stat .label {
+    display: block;
+    color: var(--text-color);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    opacity: 0.6;
+}
+
+.stat .value {
+    display: block;
+    color: var(--text-color);
+    font-size: 24px;
+    font-weight: 400;
+}
+
+.progress-bar-container {
+    display: none;
+}
+
+.progress-bar {
+    display: none;
+}
+
+.test-area {
+    margin: 40px 0;
+}
+
+.instruction-text {
+    text-align: center;
+    color: var(--text-color);
+    font-size: 14px;
+    margin-top: 15px;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.instruction-text.active {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.words-container {
+    background: var(--bg-color);
+    padding: 30px;
+    min-height: 120px;
+    line-height: 1.8;
+    font-size: 18px;
+    border: 2px solid var(--border-color);
+    transition: border-color 0.3s ease;
+    color: var(--text-color);
+}
+
+.words-container.active {
+    border-color: var(--text-color);
+}
+
+.word {
+    display: inline-block;
+    position: relative;
+    margin-right: 6px;
+    padding: 2px 4px;
+    transition: all 0.1s ease;
+}
+
+.char {
+    display: inline;
+}
+
+.char.correct {
+    color: var(--text-color);
+}
+
+.char.incorrect {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    padding: 0 2px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    border: 2px solid var(--border-color);
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.input-field:focus {
+    border-color: var(--text-color);
+    box-shadow: 0 0 0 2px var(--bg-color);
+}
+
+.input-field::placeholder {
+    color: var(--text-color);
+    opacity: 0.4;
+}
+
+.reset-btn {
+    display: block;
+    margin: 30px auto;
+    padding: 12px 30px;
+    background: none;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: inherit;
+}
+
+.reset-btn:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+.finished {
+    text-align: center;
+    padding: 30px;
+    border: 2px solid var(--border-color);
+    margin: 30px 0;
+}
+
+.finished h2 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    font-size: 24px;
+    letter-spacing: 0.5px;
+}
+
+.finished p {
+    color: var(--text-color);
+    font-size: 16px;
+    margin: 8px 0;
+}
+
+@media (max-width: 600px) {
+    .words-container {
+        font-size: 16px;
+        padding: 20px;
+        min-height: 100px;
+    }
+    
+    .stats {
+        flex-direction: column;
+    }
+    
+    .stat {
+        min-width: auto;
+    }
+}
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    .stats {
+        flex-direction: column;
+    }
+
+    .words-container {
+        font-size: 1.1em;
+        min-height: 100px;
+        padding: 15px;
+    }
+}

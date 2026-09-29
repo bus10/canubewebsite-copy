@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Busify Podcast - Can U Be</title>
-    <meta name="description" content="Busify podcast - coming soon. Deep conversations and insights.">
+    <meta name="description" content="Busify podcast - launching January 6, 2026. Deep conversations and insights.">
     <meta property="og:title" content="Busify Podcast">
-    <meta property="og:description" content="Coming soon - Deep conversations and insights">
+    <meta property="og:description" content="Launching January 6, 2026 - Deep conversations and insights">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://bus10.github.io/busify.html">
     <link rel="stylesheet" href="styles.css">
@@ -22,10 +22,28 @@
         <h2 class="subtitle">PODCAST</h2>
         
         <div class="coming-soon">
-            <div class="status-text">COMING SOON</div>
+            <div class="status-text">LAUNCHING 1/6/26</div>
+            <div class="countdown" id="countdown">
+                <div class="countdown-item">
+                    <span class="countdown-value" id="days">0</span>
+                    <span class="countdown-label">DAYS</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-value" id="hours">0</span>
+                    <span class="countdown-label">HRS</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-value" id="minutes">0</span>
+                    <span class="countdown-label">MIN</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-value" id="seconds">0</span>
+                    <span class="countdown-label">SEC</span>
+                </div>
+            </div>
             <div class="description">
                 Deep conversations and insights.<br>
-                Stay tuned for launch updates.
+                Mark your calendar for the premiere.
             </div>
         </div>
         
@@ -35,5 +53,34 @@
     </div>
     
     <script src="theme.js"></script>
+    <script>
+        // Countdown to January 6, 2026 at 12:00 AM MST (7:00 AM UTC)
+        const launchDate = new Date('2026-01-06T07:00:00Z').getTime();
+        
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = launchDate - now;
+            
+            if (distance < 0) {
+                document.getElementById('countdown').innerHTML = '<div class="status-text">LIVE NOW!</div>';
+                clearInterval(countdownInterval);
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+        }
+        
+        // Update immediately and then every second
+        updateCountdown();
+        const countdownInterval = setInterval(updateCountdown, 1000);
+    </script>
 </body>
 </html>

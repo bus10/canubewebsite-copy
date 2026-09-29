@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe - Can U Be</title>
+    <meta name="description" content="Play Tic Tac Toe in brutalist style">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            max-width: 400px;
+            margin: 40px auto;
+            background-color: var(--border-color);
+            border: 2px solid var(--border-color);
+        }
+        
+        .cell {
+            aspect-ratio: 1;
+            background-color: var(--bg-color);
+            border: none;
+            font-size: 48px;
+            font-weight: 400;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        }
+        
+        .cell:hover:not(.taken) {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+        
+        .cell.taken {
+            cursor: not-allowed;
+        }
+        
+        .game-status {
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 20px 0;
+            min-height: 28px;
+        }
+        
+        .player-x {
+            color: var(--text-color);
+        }
+        
+        .player-o {
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+        
+        .reset-button {
+            background: none;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            padding: 12px 24px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .reset-button:hover {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+        
+        @media (max-width: 600px) {
+            .cell {
+                font-size: 36px;
+            }
+            
+            .game-board {
+                max-width: 90vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" tabindex="0" aria-label="Toggle theme">Light</button>
+    
+    <div class="container center">
+        <h1>Tic Tac Toe</h1>
+        
+        <a href="index.html" class="nav-link" tabindex="0" aria-label="Back to home">← Back</a>
+        
+        <div class="game-status" id="status">Your Turn (X)</div>
+        
+        <div class="game-board" id="board">
+            <button class="cell" data-index="0"></button>
+            <button class="cell" data-index="1"></button>
+            <button class="cell" data-index="2"></button>
+            <button class="cell" data-index="3"></button>
+            <button class="cell" data-index="4"></button>
+            <button class="cell" data-index="5"></button>
+            <button class="cell" data-index="6"></button>
+            <button class="cell" data-index="7"></button>
+            <button class="cell" data-index="8"></button>
+        </div>
+        
+        <button class="reset-button" id="resetBtn">Reset Game</button>
+        
+        <div class="controls">
+            You are X, Bot is O
+        </div>
+        
+        <div class="footer spaced">
+            Website made by @bus0
+        </div>
+    </div>
+    
+    <script src="theme.js"></script>
+    <script>
+        const cells = document.querySelectorAll('.cell');
+        const statusDisplay = document.getElementById('status');
+        const resetButton = document.getElementById('resetBtn');
+        
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let gameState = ['', '', '', '', '', '', '', '', ''];
+        
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+        
+        function handleCellClick(e) {
+            const clickedCell = e.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+            
+            // Only allow human player to move on their turn
+            if (gameState[clickedCellIndex] !== '' || !gameActive || currentPlayer !== 'X') {
+                return;
+            }
+            
+            handleCellPlayed(clickedCell, clickedCellIndex);
+            handleResultValidation();
+        }
+        
+        function handleCellPlayed(clickedCell, clickedCellIndex) {
+            gameState[clickedCellIndex] = currentPlayer;
+            clickedCell.textContent = currentPlayer;
+            clickedCell.classList.add('taken');
+            clickedCell.classList.add(currentPlayer === 'X' ? 'player-x' : 'player-o');
+        }
+        
+        function handleResultValidation() {
+            let roundWon = false;
+            
+            for (let i = 0; i < winningConditions.length; i++) {
+                const winCondition = winningConditions[i];
+                const a = gameState[winCondition[0]];
+                const b = gameState[winCondition[1]];
+                const c = gameState[winCondition[2]];
+                
+                if (a === '' || b === '' || c === '') {
+                    continue;
+                }
+                
+                if (a === b && b === c) {
+                    roundWon = true;
+                    break;
+                }
+            }
+            
+            if (roundWon) {
+                if (currentPlayer === 'X') {
+                    statusDisplay.textContent = 'You Win!';
+                } else {
+                    statusDisplay.textContent = 'Bot Wins!';
+                }
+                gameActive = false;
+                return;
+            }
+            
+            const roundDraw = !gameState.includes('');
+            if (roundDraw) {
+                statusDisplay.textContent = 'Draw!';
+                gameActive = false;
+                return;
+            }
+            
+            handlePlayerChange();
+        }
+        
+        function handlePlayerChange() {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            
+            if (currentPlayer === 'X') {
+                statusDisplay.textContent = "Your Turn (X)";
+            } else {
+                statusDisplay.textContent = "Bot is thinking...";
+                // Bot makes a move after a short delay
+                setTimeout(botMove, 500);
+            }
+        }
+        
+        // Minimax algorithm for bot AI
+        function minimax(board, depth, isMaximizing) {
+            const winner = checkWinner(board);
+            
+            // Terminal states
+            if (winner === 'O') return 10 - depth;
+            if (winner === 'X') return depth - 10;
+            if (!board.includes('')) return 0;
+            
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+        
+        function checkWinner(board) {
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+            return null;
+        }
+        
+        function botMove() {
+            if (!gameActive) return;
+            
+            let bestScore = -Infinity;
+            let bestMove = -1;
+            
+            // Find the best move using minimax
+            for (let i = 0; i < 9; i++) {
+                if (gameState[i] === '') {
+                    gameState[i] = 'O';
+                    let score = minimax(gameState, 0, false);
+                    gameState[i] = '';
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            
+            // Make the move
+            if (bestMove !== -1) {
+                const cell = cells[bestMove];
+                handleCellPlayed(cell, bestMove);
+                handleResultValidation();
+            }
+        }
+        
+        function handleReset() {
+            gameActive = true;
+            currentPlayer = 'X';
+            gameState = ['', '', '', '', '', '', '', '', ''];
+            statusDisplay.textContent = "Your Turn (X)";
+            
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('taken', 'player-x', 'player-o');
+            });
+        }
+        
+        // Event listeners
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        resetButton.addEventListener('click', handleReset);
+        
+        // Keyboard navigation
+        cells.forEach((cell, index) => {
+            cell.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    cell.click();
+                }
+                
+                // Arrow key navigation
+                let nextIndex = index;
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    nextIndex = (index + 1) % 9;
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    nextIndex = (index - 1 + 9) % 9;
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    nextIndex = (index + 3) % 9;
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    nextIndex = (index - 3 + 9) % 9;
+                }
+                
+                if (nextIndex !== index) {
+                    cells[nextIndex].focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

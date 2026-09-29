@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type Speed Test - Can U Be</title>
+    <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" tabindex="0" aria-label="Toggle theme">Light</button>
+    
+    <div class="container center">
+        <a href="../index.html" class="nav-link" tabindex="0" aria-label="Back to home">← Back</a>
+        
+        <h1>TYPE SPEED TEST</h1>
+
+        <div class="test-length-selector">
+            <button class="length-btn active" data-length="30">SHORT (30s)</button>
+            <button class="length-btn" data-length="60">MEDIUM (60s)</button>
+            <button class="length-btn" data-length="120">LONG (120s)</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <span class="label">WPM</span>
+                <span class="value" id="wpm">0</span>
+            </div>
+            <div class="stat">
+                <span class="label">Accuracy</span>
+                <span class="value" id="accuracy">100%</span>
+            </div>
+            <div class="stat">
+                <span class="label">Time</span>
+                <span class="value" id="timer">60</span>
+            </div>
+        </div>
+
+        <div class="test-area">
+            <div class="words-container" id="wordsContainer"></div>
+            <p class="instruction-text">Start typing to begin...</p>
+        </div>
+
+        <button class="reset-btn" id="resetBtn">Start Again</button>
+
+        <div class="controls">
+            Type the words as they appear. Your typing will be automatically evaluated.
+        </div>
+        
+        <div class="footer spaced">
+            Website made by @bus0
+        </div>
+    </div>
+
+    <script src="../theme.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
