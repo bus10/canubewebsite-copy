@@ -533,6 +533,28 @@ test('notfound:page', () => withPage('notfound', {}, async ({ page }) => {
     assert((await page.textContent('h1')) === '404', '404 heading did not settle');
 }));
 
+// ---- Task 8: cleanup ----
+test('cleanup:theme-js-removed', async () => {
+    assert(!existsSync(path.join(ROOT, 'theme.js')), 'theme.js still exists');
+    assert(!existsSync(path.join(ROOT, 'type speed test', 'styles.css')), 'type speed test/styles.css still exists');
+});
+
+test('cleanup:sitemap', async () => {
+    const xml = readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
+    const now = new Date(); // local date, matching the bump script's datetime.date.today()
+    const today = [now.getFullYear(), now.getMonth() + 1, now.getDate()].map(n => String(n).padStart(2, '0')).join('-');
+    const blocks = xml.match(/<url>[\s\S]*?<\/url>/g);
+    for (const block of blocks) {
+        const lastmod = block.match(/<lastmod>([^<]*)<\/lastmod>/)[1];
+        if (block.includes('/time-machine/')) assert(lastmod.startsWith('2024-'), 'archive lastmod changed: ' + block);
+        else assert(lastmod === today, 'live page lastmod not updated: ' + block.match(/<loc>([^<]*)/)[1]);
+    }
+});
+
+test('archive:untouched', async () => {
+    execSync('git diff --quiet 12364c0 -- time-machine', { cwd: ROOT });
+});
+
 // ==== RUNNER ====
 async function shots() {
     const dir = path.join(ROOT, 'tools', 'shots');
