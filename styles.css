@@ -393,31 +393,6 @@ h1 {
     to { background-size: 100% 100%; }
 }
 
-/* ---- Cursor (fine pointers only; created by site.js) ---- */
-.cursor {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 100;
-    width: 16px;
-    height: 16px;
-    margin: -8px 0 0 -8px;
-    background: #fff; /* white + difference = inverts whatever is underneath, in both themes */
-    mix-blend-mode: difference;
-    pointer-events: none;
-    transform: translate(-100px, -100px);
-}
-
-.cursor.is-big {
-    width: 48px;
-    height: 48px;
-    margin: -24px 0 0 -24px;
-}
-
-.cursor.is-hidden {
-    display: none;
-}
-
 /* ---- Small screens ---- */
 @media (max-width: 600px) {
     .topbar {

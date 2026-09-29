@@ -229,14 +229,9 @@ test('motion:reduced', () => withPage('index', { reducedMotion: 'reduce' }, asyn
     assert(visible, 'row title disappears on hover under reduced motion');
 }));
 
-test('motion:cursor', () => withPage('index', {}, async ({ page }) => {
+test('motion:no-cursor', () => withPage('index', {}, async ({ page }) => {
     await page.mouse.move(200, 300);
-    const r = await page.evaluate(() => {
-        const c = document.querySelector('.cursor');
-        return c && { pe: getComputedStyle(c).pointerEvents, blend: getComputedStyle(c).mixBlendMode };
-    });
-    assert(r, '.cursor missing on a fine-pointer device');
-    assert(r.pe === 'none' && r.blend === 'difference', 'cursor styles wrong: ' + JSON.stringify(r));
+    assert(await page.locator('.cursor').count() === 0, 'custom cursor element should not exist');
 }));
 
 test('index:rows', () => withPage('index', {}, async ({ page }) => {

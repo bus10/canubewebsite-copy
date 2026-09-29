@@ -170,35 +170,6 @@
         });
     }
 
-    /* ---- Cursor ---- */
-    function initCursor() {
-        if (!window.matchMedia('(pointer: fine)').matches) return;
-        const cursor = document.createElement('div');
-        cursor.className = 'cursor';
-        cursor.setAttribute('aria-hidden', 'true');
-        document.body.appendChild(cursor);
-        let x = -100;
-        let y = -100;
-        let queued = false;
-        window.addEventListener('pointermove', e => {
-            x = e.clientX;
-            y = e.clientY;
-            const target = e.target instanceof Element ? e.target : null;
-            cursor.classList.toggle('is-hidden', !!(target && target.closest('canvas, .cell')));
-            cursor.classList.toggle('is-big', !!(target && target.closest('a, button, .index-row')));
-            if (!queued) {
-                queued = true;
-                requestAnimationFrame(() => {
-                    queued = false;
-                    cursor.style.transform = `translate(${x}px, ${y}px)`;
-                });
-            }
-        }, { passive: true });
-        document.addEventListener('mouseout', e => {
-            if (!e.relatedTarget) cursor.classList.add('is-hidden');
-        });
-    }
-
     /* ---- Audio loading status ---- */
     function watchAudio(audio, status) {
         const ready = () => { status.hidden = true; };
@@ -226,6 +197,5 @@
         initMarquees();
         initIndexRows();
         initScramble();
-        initCursor();
     });
 })();
