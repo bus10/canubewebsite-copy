@@ -152,10 +152,12 @@ h1 {
     border: var(--rule) solid var(--border-color);
 }
 
-.topbar a:hover,
-.theme-toggle:hover {
-    background: var(--text-color);
-    color: var(--bg-color);
+@media (hover: hover) {
+    .topbar a:hover,
+    .theme-toggle:hover {
+        background: var(--text-color);
+        color: var(--bg-color);
+    }
 }
 
 @keyframes blink {
@@ -269,25 +271,35 @@ h1 {
     display: none;
 }
 
-.index-row:hover,
 .index-row:focus-visible {
     background: var(--text-color);
     color: var(--bg-color);
-}
-
-.index-row:focus-visible {
     outline-color: var(--bg-color);
     outline-offset: -6px;
 }
 
-.index-row.has-marquee:hover .index-title-text,
 .index-row.has-marquee:focus-visible .index-title-text {
     display: none;
 }
 
-.index-row:hover .marquee-track,
 .index-row:focus-visible .marquee-track {
     display: inline-flex;
+}
+
+/* Hover effects only where hover exists; on touch a tap just navigates */
+@media (hover: hover) {
+    .index-row:hover {
+        background: var(--text-color);
+        color: var(--bg-color);
+    }
+
+    .index-row.has-marquee:hover .index-title-text {
+        display: none;
+    }
+
+    .index-row:hover .marquee-track {
+        display: inline-flex;
+    }
 }
 
 /* ---- Buttons ---- */
@@ -300,10 +312,16 @@ h1 {
     text-align: center;
 }
 
-.btn:hover,
 .btn.is-active {
     background: var(--text-color);
     color: var(--bg-color);
+}
+
+@media (hover: hover) {
+    .btn:hover {
+        background: var(--text-color);
+        color: var(--bg-color);
+    }
 }
 
 .btn:active {
@@ -497,9 +515,11 @@ h1 {
     line-height: 1;
 }
 
-.cell:hover:not(.taken) {
-    background: var(--text-color);
-    color: var(--bg-color);
+@media (hover: hover) {
+    .cell:hover:not(.taken) {
+        background: var(--text-color);
+        color: var(--bg-color);
+    }
 }
 
 .cell.taken {

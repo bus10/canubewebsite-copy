@@ -119,11 +119,26 @@
             title.appendChild(track);
             row.classList.add('has-marquee');
         });
+        setRowMarqueeSpeeds();
+        if (document.fonts) document.fonts.ready.then(setRowMarqueeSpeeds);
+    }
+
+    // Row tracks are display:none until hover, so measure them briefly shown; ~80px/s like the ticker
+    function setRowMarqueeSpeeds() {
+        document.querySelectorAll('.index-row .marquee-track').forEach(track => {
+            track.style.display = 'inline-flex';
+            const half = track.scrollWidth / 2;
+            track.style.display = '';
+            if (half) track.style.setProperty('--marquee-duration', (half / 80) + 's');
+        });
     }
 
     /* ---- Scramble headings ---- */
     function scramble(el) {
         clearInterval(el._scrambleTimer);
+        // Random glyphs are wider than the real text in Anton; lock the box so the page doesn't jump
+        el.style.height = el.getBoundingClientRect().height + 'px'; // exact, not rounded like offsetHeight
+        el.style.overflow = 'hidden';
         const text = el.dataset.text;
         const frames = 15; // 15 × 40ms ≈ 600ms
         let frame = 0;
@@ -139,6 +154,8 @@
             if (frame >= frames) {
                 clearInterval(el._scrambleTimer);
                 el.textContent = text;
+                el.style.height = '';
+                el.style.overflow = '';
             }
         }, 40);
     }

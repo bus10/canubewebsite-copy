@@ -61,6 +61,7 @@ async function open(key, opts = {}) {
     const context = await browser.newContext({
         viewport: { width: opts.width || 1280, height: 900 },
         reducedMotion: opts.reducedMotion || 'no-preference',
+        ...(opts.touch ? { isMobile: true, hasTouch: true } : {}),
     });
     if (opts.theme) await context.addInitScript(t => { try { localStorage.setItem('theme', t); } catch (e) {} }, opts.theme);
     if (opts.initScript) await context.addInitScript(opts.initScript);
@@ -554,6 +555,43 @@ test('cleanup:sitemap', async () => {
 test('archive:untouched', async () => {
     execSync('git diff --quiet 12364c0 -- time-machine', { cwd: ROOT });
 });
+
+// ---- Final review fixes ----
+test('review:scramble-no-shift', () => withPage('type', { width: 375 }, async ({ page }) => {
+    await page.waitForTimeout(900);
+    const settled = await page.evaluate(() => document.querySelector('h1').getBoundingClientRect().height);
+    await page.hover('h1');
+    const heights = await page.evaluate(async () => {
+        const h = document.querySelector('h1');
+        const out = [];
+        for (let i = 0; i < 10; i++) {
+            out.push(h.getBoundingClientRect().height);
+            await new Promise(r => setTimeout(r, 40));
+        }
+        return out;
+    });
+    assert(heights.every(h => h === settled), `heading height shifts while scrambling: settled ${settled}, saw ${heights.join(',')}`);
+}));
+
+test('review:touch-no-sticky-hover', () => withPage('index', { width: 375, touch: true }, async ({ page }) => {
+    await page.evaluate(() => document.querySelectorAll('.index-row').forEach(a => a.addEventListener('click', e => e.preventDefault())));
+    await page.tap('.index-row >> nth=1');
+    await page.waitForTimeout(100);
+    const bg = await page.locator('.index-row').nth(1).evaluate(e => getComputedStyle(e).backgroundColor);
+    assert(bg !== 'rgb(255, 255, 255)', 'tapped row stays inverted on a touch device: ' + bg);
+}));
+
+test('review:row-marquee-speed', () => withPage('index', {}, async ({ page }) => {
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(100);
+    const speeds = await page.$$eval('.index-row .marquee-track', tracks => tracks.map(t => {
+        t.style.display = 'inline-flex';
+        const half = t.scrollWidth / 2;
+        t.style.display = '';
+        return Math.round(half / parseFloat(getComputedStyle(t).animationDuration));
+    }));
+    assert(speeds.every(s => s > 0 && s <= 100), 'row marquee speeds (px/s) should be ~80: ' + speeds.join(','));
+}));
 
 // ==== RUNNER ====
 async function shots() {
