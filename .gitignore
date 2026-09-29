@@ -12,3 +12,6 @@ audio/*.wav
 *.zip
 *.tar
 *.tar.gz
+
+# Verification screenshots (tools/check.mjs --shots)
+tools/shots/

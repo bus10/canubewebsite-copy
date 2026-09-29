@@ -1,0 +1,12 @@
+{
+  "name": "canube-checks",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only browser verification for the static site. Not used by any page.",
+  "scripts": {
+    "check": "node check.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}
