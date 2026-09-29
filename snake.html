@@ -1,40 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snake Game - Can U Be</title>
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <script>try{if(localStorage.getItem('theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <button class="theme-toggle" onclick="toggleTheme()" tabindex="0" aria-label="Toggle theme">Light</button>
-    
-    <div class="container center">
-        <h1>Snake</h1>
-        
-    <a href="index.html" class="nav-link" tabindex="0" aria-label="Back to home">← Back</a>
-        
-        <div class="score">Score: <span id="score">0</span></div>
-        
-        <div style="width:100%;max-width:400px;margin:0 auto;">
-            <canvas id="gameCanvas" width="400" height="400" style="width:100%;height:auto;display:block;"></canvas>
+    <header class="topbar">
+        <a href="index.html" class="topbar-home">CAN U BE</a>
+        <span class="live-dot" aria-hidden="true">●</span>
+        <time class="clock" aria-label="Current time">00:00:00</time>
+        <a href="index.html" class="topbar-back">← INDEX</a>
+        <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle theme">[LIGHT]</button>
+    </header>
+
+    <main class="page">
+        <div class="page-head">
+            <h1 data-scramble>SNAKE</h1>
+            <p class="meta">04 / ARROW KEYS OR WASD TO MOVE</p>
         </div>
-        
-        <div class="controls">
-            Use arrow keys or WASD to move
+
+        <div class="game">
+            <div class="stat-row">
+                <div class="stat"><span class="stat-label">SCORE</span><span class="stat-value" id="score">0</span></div>
+            </div>
+            <canvas id="gameCanvas" class="game-canvas" width="400" height="400"></canvas>
+            <p id="gameOver" class="game-over" hidden>GAME OVER — PRESS SPACE TO RESTART</p>
         </div>
-        
-        <div id="gameOver" class="game-over" style="display: none;">
-            Game Over - Press Space to restart
-        </div>
-        
-        <div class="footer">
-            Website made by @bus0
-        </div>
-    </div>
-    
-    <script src="theme.js"></script>
+    </main>
+
+    <footer class="ticker marquee" aria-label="Website made by @bus0">
+        <div class="marquee-track"><span>WEBSITE MADE BY @BUS0&nbsp;·&nbsp;</span><span>CAN U BE&nbsp;·&nbsp;</span></div>
+    </footer>
+
+    <script src="site.js"></script>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -75,14 +80,9 @@
             food = freeCells[Math.floor(Math.random() * freeCells.length)];
         }
         
-        // Get current theme colors
+        // Get current theme colors (strict black/white, from site.js)
         function getThemeColors() {
-            const isLight = document.body.getAttribute('data-theme') === 'light';
-            return {
-                bg: isLight ? '#fff' : '#000',
-                fg: isLight ? '#000' : '#fff',
-                apple: isLight ? '#e74c3c' : '#ff6b6b'  // Red apple in both themes
-            };
+            return themeColors();
         }
 
         // Interpolation for smooth movement
@@ -112,9 +112,10 @@
                 ctx.fillRect(drawX * gridSize, drawY * gridSize, gridSize - 2, gridSize - 2);
             });
 
-            // Draw apple with distinct color
-            ctx.fillStyle = colors.apple;
-            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+            // Draw apple as a hollow square so it reads apart from the solid snake
+            ctx.strokeStyle = colors.fg;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(food.x * gridSize + 1, food.y * gridSize + 1, gridSize - 4, gridSize - 4);
         }
 
         // Update game state
@@ -161,7 +162,7 @@
 
         function gameOver() {
             gameRunning = false;
-            gameOverElement.style.display = 'block';
+            gameOverElement.hidden = false;
         }
 
         function resetGame() {
@@ -173,7 +174,7 @@
             score = 0;
             scoreElement.textContent = score;
             gameRunning = true;
-            gameOverElement.style.display = 'none';
+            gameOverElement.hidden = true;
             randomFood();
         }
 

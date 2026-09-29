@@ -392,6 +392,63 @@ test('busify:live', () => withPage('busify', { fixedTime: '2026-11-01T00:00:00Z'
     assert(same, 'band is being rebuilt every tick after expiry');
 }));
 
+// ---- Task 4: canvas games ----
+shellTests('snake');
+shellTests('plinko');
+
+test('snake:play', () => withPage('snake', {}, async ({ page }) => {
+    assert(await page.evaluate(() => snake[0].x) === 10, 'snake should start at x=10');
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(350);
+    assert(await page.evaluate(() => snake[0].x) > 10, 'snake did not move right');
+    await page.evaluate(() => { food = { x: snake[0].x + 1, y: snake[0].y }; });
+    await page.waitForTimeout(250);
+    assert((await page.textContent('#score')).trim() === '10', 'score did not increase after eating');
+}));
+
+test('snake:game-over', () => withPage('snake', {}, async ({ page }) => {
+    assert(await page.isHidden('#gameOver'), 'game over visible at start');
+    await page.evaluate(() => gameOver());
+    assert(await page.isVisible('#gameOver'), 'game over not shown');
+    await page.keyboard.press('Space');
+    assert(await page.isHidden('#gameOver'), 'space did not restart');
+}));
+
+test('snake:ink', () => withPage('snake', {}, async ({ page }) => {
+    await page.waitForTimeout(200);
+    assert(await isGrayscale(page, '#gameCanvas'), 'snake canvas has non-gray pixels (red apple?)');
+}));
+
+test('snake:theme-redraw', () => withPage('snake', {}, async ({ page }) => {
+    await page.evaluate(() => { food = { x: 0, y: 0 }; }); // keep the bottom-right corner empty
+    await page.waitForTimeout(100);
+    assert(JSON.stringify(await pixel(page, '#gameCanvas', 399, 399)) === '[0,0,0]', 'dark background not black');
+    await page.click('.theme-toggle');
+    await page.waitForTimeout(100);
+    assert(JSON.stringify(await pixel(page, '#gameCanvas', 399, 399)) === '[255,255,255]', 'canvas did not redraw light');
+}));
+
+test('plinko:play', () => withPage('plinko', {}, async ({ page }) => {
+    const box = await page.locator('#plinkoCanvas').boundingBox();
+    await page.mouse.click(box.x + box.width / 2, box.y + 10);
+    await page.waitForFunction(() => Number(document.getElementById('score').textContent) > 0, null, { timeout: 10000 });
+    assert(await isGrayscale(page, '#plinkoCanvas'), 'plinko canvas has non-gray pixels');
+    await page.click('button.btn:has-text("RESET")');
+    assert((await page.textContent('#score')).trim() === '0', 'reset did not zero the score');
+}));
+
+test('plinko:theme-redraw', () => withPage('plinko', {}, async ({ page }) => {
+    assert(JSON.stringify(await pixel(page, '#plinkoCanvas', 1, 1)) === '[0,0,0]', 'dark background not black');
+    await page.click('.theme-toggle');
+    await page.waitForTimeout(100);
+    assert(JSON.stringify(await pixel(page, '#plinkoCanvas', 1, 1)) === '[255,255,255]', 'plinko did not redraw on themechange');
+}));
+
+test('plinko:font', () => withPage('plinko', {}, async ({ page }) => {
+    const font = await page.evaluate(() => ctx.font);
+    assert(font.includes('JetBrains Mono'), 'slot labels not in JetBrains Mono: ' + font);
+}));
+
 // ==== RUNNER ====
 async function shots() {
     const dir = path.join(ROOT, 'tools', 'shots');

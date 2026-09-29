@@ -447,3 +447,24 @@ h1 {
     font-size: clamp(32px, 7vw, 88px);
     line-height: 1.1;
 }
+
+/* ---- Games ---- */
+.game {
+    max-width: 400px;
+}
+
+.game .stat-row {
+    margin-top: 0;
+}
+
+.game-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: var(--rule) solid var(--border-color);
+}
+
+.game-over {
+    margin-top: var(--s3);
+    font-weight: 700;
+}
