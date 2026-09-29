@@ -509,3 +509,67 @@ h1 {
 .cell:focus-visible {
     outline-offset: -6px;
 }
+
+/* ---- Type Speed Test ---- */
+.test-area {
+    margin: var(--s4) 0;
+}
+
+.words-container {
+    min-height: 120px;
+    padding: var(--s4);
+    border: var(--rule) solid var(--border-color);
+    font-size: 18px;
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+    text-transform: none; /* show words exactly as they must be typed */
+}
+
+.word {
+    display: inline-block;
+    margin-right: 0.6em;
+}
+
+.word.current {
+    box-shadow: inset 0 calc(-1 * var(--rule)) 0 var(--text-color);
+}
+
+.char.incorrect {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+.instruction-text {
+    margin-top: var(--s3);
+    font-size: 11px;
+    opacity: var(--muted);
+}
+
+.instruction-text.active {
+    visibility: hidden;
+}
+
+.finished {
+    margin-bottom: var(--s4);
+    padding: var(--s4);
+    border: var(--rule) solid var(--border-color);
+}
+
+.finished h2 {
+    margin-bottom: var(--s3);
+    font-family: var(--font-display);
+    font-size: clamp(32px, 7vw, 64px);
+    font-weight: 400;
+    line-height: 1;
+}
+
+.finished p {
+    margin: var(--s1) 0;
+}
+
+@media (max-width: 600px) {
+    .words-container {
+        padding: var(--s3);
+        font-size: 16px;
+    }
+}

@@ -476,6 +476,32 @@ test('ttt:style', () => withPage('ttt', {}, async ({ page }) => {
     assert(r.resetIsBtn, '#resetBtn is not a .btn');
 }));
 
+// ---- Task 6: Type Speed Test ----
+shellTests('type');
+
+test('type:buttons', () => withPage('type', {}, async ({ page, requests }) => {
+    assert(!requests.some(u => u.includes('type%20speed%20test/styles.css')), 'old type test stylesheet still loaded');
+    const isActive = sel => page.$eval(sel, e => e.classList.contains('btn') && e.classList.contains('is-active'));
+    assert(await isActive('.length-btn[data-length="30"]'), 'SHORT should start as .btn.is-active');
+    await page.click('.length-btn[data-length="60"]');
+    assert(await isActive('.length-btn[data-length="60"]'), 'MEDIUM not active after click');
+    assert(!(await isActive('.length-btn[data-length="30"]')), 'SHORT still active after switching');
+    assert((await page.textContent('#timer')).trim() === '60', 'timer did not switch to 60');
+    const labels = await page.$$eval('.stat-row .stat-label', els => els.map(e => e.textContent.trim()));
+    assert(JSON.stringify(labels) === '["WPM","ACCURACY","TIME"]', 'stat labels: ' + JSON.stringify(labels));
+}));
+
+test('type:run', () => withPage('type', { installClock: true }, async ({ page }) => {
+    await page.keyboard.type('abc ');
+    await page.clock.runFor(31000);
+    assert(await page.locator('.finished').count() === 1, 'results panel not shown after a 30s run');
+}));
+
+test('focus:type-case', () => withPage('type', {}, async ({ page }) => {
+    const tt = await page.$eval('.words-container', e => getComputedStyle(e).textTransform);
+    assert(tt === 'none', 'words are being uppercased (text-transform: ' + tt + ')');
+}));
+
 // ==== RUNNER ====
 async function shots() {
     const dir = path.join(ROOT, 'tools', 'shots');

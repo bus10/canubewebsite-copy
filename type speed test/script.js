@@ -376,8 +376,8 @@ lengthButtons.forEach(btn => {
         if (testActive) return; // Don't allow changes during test
         
         // Update active state
-        lengthButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        lengthButtons.forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
         
         // Set new duration
         testDuration = parseInt(btn.getAttribute('data-length'));
