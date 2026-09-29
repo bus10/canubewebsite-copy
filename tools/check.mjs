@@ -449,6 +449,33 @@ test('plinko:font', () => withPage('plinko', {}, async ({ page }) => {
     assert(font.includes('JetBrains Mono'), 'slot labels not in JetBrains Mono: ' + font);
 }));
 
+// ---- Task 5: Tic Tac Toe ----
+shellTests('ttt');
+
+test('ttt:play', () => withPage('ttt', {}, async ({ page }) => {
+    for (let turn = 0; turn < 5; turn++) {
+        if (/WIN|DRAW/i.test(await page.textContent('#status'))) break;
+        const idx = await page.evaluate(() => gameState.indexOf(''));
+        await page.click(`.cell[data-index="${idx}"]`);
+        await page.waitForTimeout(700); // bot replies after 500ms
+    }
+    const status = await page.textContent('#status');
+    assert(/WIN|DRAW/i.test(status), 'round did not finish: ' + status);
+    await page.click('#resetBtn');
+    assert((await page.textContent('#status')) === 'Your Turn (X)', 'reset did not restore status');
+    const empty = await page.$$eval('.cell', cells => cells.every(c => c.textContent === ''));
+    assert(empty, 'reset did not clear cells');
+}));
+
+test('ttt:style', () => withPage('ttt', {}, async ({ page }) => {
+    const r = await page.evaluate(() => ({
+        cellFont: getComputedStyle(document.querySelector('.cell')).fontFamily,
+        resetIsBtn: document.getElementById('resetBtn').classList.contains('btn'),
+    }));
+    assert(r.cellFont.includes('Anton'), 'cells not in Anton: ' + r.cellFont);
+    assert(r.resetIsBtn, '#resetBtn is not a .btn');
+}));
+
 // ==== RUNNER ====
 async function shots() {
     const dir = path.join(ROOT, 'tools', 'shots');

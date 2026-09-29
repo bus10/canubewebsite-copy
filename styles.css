@@ -468,3 +468,44 @@ h1 {
     margin-top: var(--s3);
     font-weight: 700;
 }
+
+/* ---- Tic Tac Toe ---- */
+.game-status {
+    min-height: 1.5em;
+    margin-bottom: var(--s3);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--rule);
+    background: var(--border-color);
+    border: var(--rule) solid var(--border-color);
+}
+
+.cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-display);
+    font-size: clamp(48px, 14vw, 96px);
+    line-height: 1;
+}
+
+.cell:hover:not(.taken) {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+.cell.taken {
+    cursor: not-allowed;
+}
+
+.cell:focus-visible {
+    outline-offset: -6px;
+}
