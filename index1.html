@@ -5,38 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Can U Be</title>
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <script>try{if(localStorage.getItem('theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <button class="theme-toggle" onclick="toggleTheme()">Light</button>
-    
-    <div id="loader"></div>
-    
-    <div class="container center">
-        <h1>Can U Be</h1>
-        
-        <a href="index.html" class="nav-link">← Back</a>
-        
-        <audio controls>
+    <header class="topbar">
+        <a href="index.html" class="topbar-home">CAN U BE</a>
+        <span class="live-dot" aria-hidden="true">●</span>
+        <time class="clock" aria-label="Current time">00:00:00</time>
+        <a href="index.html" class="topbar-back">← INDEX</a>
+        <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle theme">[LIGHT]</button>
+    </header>
+
+    <main class="page">
+        <div class="page-head">
+            <h1 data-scramble>CAN U BE</h1>
+            <p class="meta">01 / MUSIC PLAYER</p>
+        </div>
+
+        <p class="loading" id="loading" role="status">LOADING<span class="loading-bar" aria-hidden="true"></span></p>
+        <audio controls id="audioPlayer">
             <source src="audio/canube.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
-        
-        <div class="footer">
-            Website made by @bus0
-        </div>
-    </div>
-    
-    <script src="theme.js"></script>
-    <script>
-        var audio = document.querySelector('audio');
-        var loader = document.getElementById('loader');
-        var container = document.querySelector('.container');
+    </main>
 
-        audio.addEventListener('canplaythrough', function() {
-            loader.style.display = 'none';
-            container.style.display = 'block';
-        });
+    <footer class="ticker marquee" aria-label="Website made by @bus0">
+        <div class="marquee-track"><span>WEBSITE MADE BY @BUS0&nbsp;·&nbsp;</span><span>CAN U BE&nbsp;·&nbsp;</span></div>
+    </footer>
+
+    <script src="site.js"></script>
+    <script>
+        watchAudio(document.getElementById('audioPlayer'), document.getElementById('loading'));
     </script>
 </body>
 </html>

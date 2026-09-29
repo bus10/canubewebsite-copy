@@ -314,6 +314,53 @@ test('focus:rapid-rehover', () => withPage('index', {}, async ({ page }) => {
     assert(await page.textContent('h1') === 'CAN U BE', 'heading stuck scrambled after rapid re-hover');
 }));
 
+// ---- Task 2: music pages ----
+shellTests('music');
+shellTests('bi');
+
+test('music:player', () => withPage('music', {}, async ({ page }) => {
+    const r = await page.evaluate(() => ({
+        meta: document.querySelector('.page-head .meta')?.textContent.trim(),
+        source: !!document.querySelector('main audio#audioPlayer[controls] source[src="audio/canube.mp3"]'),
+        mainVisible: getComputedStyle(document.querySelector('main')).display !== 'none',
+    }));
+    assert(r.meta === '01 / MUSIC PLAYER', 'meta line: ' + r.meta);
+    assert(r.source, 'audio#audioPlayer with canube.mp3 source missing');
+    assert(r.mainVisible, 'main content hidden while loading');
+    await page.waitForSelector('#loading', { state: 'hidden', timeout: 8000 });
+}));
+
+test('bi:today', () => withPage('bi', { fixedTime: '2026-09-29T18:00:00Z' /* a Tuesday */ }, async ({ page }) => {
+    const r = await page.evaluate(() => ({
+        meta: document.querySelector('.page-head .meta').textContent.trim(),
+        src: document.getElementById('audioPlayer').getAttribute('src'),
+        art: document.querySelector('img.artwork').getAttribute('src'),
+        border: getComputedStyle(document.querySelector('img.artwork')).borderTopWidth,
+    }));
+    assert(r.meta === '02 / TODAY: TUESDAY — HAD IT BACK TO', 'meta line: ' + r.meta);
+    assert(r.src === 'audio/9:19-had-itback.mp3', 'Tuesday song wrong: ' + r.src);
+    assert(r.art === 'images/Benevolent Inequality-artwork.jpeg', 'artwork src: ' + r.art);
+    assert(r.border === '2px', 'artwork frame: ' + r.border);
+}));
+
+test('focus:audio-error', () => withPage('music', {
+    route: ['**/*.mp3', route => route.fulfill({ status: 404, body: '' })],
+}, async ({ page }) => {
+    await page.waitForFunction(() => {
+        const s = document.getElementById('loading');
+        return !s.hidden && s.textContent.trim() === 'AUDIO UNAVAILABLE';
+    }, null, { timeout: 5000 });
+}));
+
+test('focus:audio-play-hides-loading', () => withPage('bi', {
+    route: ['**/*.mp3', () => { /* never respond: simulates a browser that won't preload (iOS) */ }],
+    waitUntil: 'domcontentloaded',
+}, async ({ page }) => {
+    assert(await page.isVisible('#loading'), 'loading should show while audio is pending');
+    await page.evaluate(() => document.getElementById('audioPlayer').dispatchEvent(new Event('play')));
+    assert(await page.isHidden('#loading'), 'loading still visible after play');
+}));
+
 // ==== RUNNER ====
 async function shots() {
     const dir = path.join(ROOT, 'tools', 'shots');

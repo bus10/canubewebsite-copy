@@ -422,3 +422,17 @@ h1 {
 }
 
 /* ==== Page sections (appended by later tasks) ==== */
+
+/* ---- Music pages ---- */
+.artwork {
+    width: 100%;
+    max-width: 560px;
+    border: var(--rule) solid var(--border-color);
+}
+
+.page audio {
+    display: block;
+    width: 100%;
+    max-width: 560px;
+    margin-top: var(--s3);
+}
