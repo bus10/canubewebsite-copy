@@ -1,5 +1,7 @@
 /* CAN U BE — shared behavior, loaded on every page before page scripts.
-   Globals for pages: toggleTheme(), themeColors(), setMarqueeText(), watchAudio(). */
+   Globals for pages: toggleTheme(), themeColors(), setMarqueeText(), watchAudio().
+   Also injects the ticker's [PAUSE] control (not under reduced motion) and keeps
+   <meta name="theme-color"> in sync with --bg-color. */
 (function () {
     const root = document.documentElement;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -25,7 +27,19 @@
             // Storage blocked (private mode): theme still switches for this page view
         }
         updateToggleLabels();
+        syncThemeColor();
         document.dispatchEvent(new CustomEvent('themechange', { detail: { theme: next } }));
+    }
+
+    // Browser chrome follows the token, so no color is hardcoded here
+    function syncThemeColor() {
+        let meta = document.querySelector('meta[name="theme-color"]');
+        if (!meta) {
+            meta = document.createElement('meta');
+            meta.name = 'theme-color';
+            document.head.appendChild(meta);
+        }
+        meta.content = themeColors().bg;
     }
 
     // Current ink colors for <canvas> drawing
@@ -35,6 +49,38 @@
             bg: style.getPropertyValue('--bg-color').trim(),
             fg: style.getPropertyValue('--text-color').trim()
         };
+    }
+
+    /* ---- Motion pause (WCAG 2.2.2: moving content needs a pause for every input) ---- */
+    function motionPaused() {
+        return root.dataset.motion === 'paused';
+    }
+
+    function setMotionPaused(paused) {
+        if (paused) root.dataset.motion = 'paused';
+        else delete root.dataset.motion;
+        document.querySelectorAll('.motion-toggle').forEach(btn => {
+            btn.textContent = paused ? '[PLAY]' : '[PAUSE]';
+        });
+    }
+
+    function initMotionToggle() {
+        if (reducedMotion) return;
+        let saved = null;
+        try { saved = localStorage.getItem('motion'); } catch (e) { /* storage blocked */ }
+        setMotionPaused(saved === 'paused');
+        const ticker = document.querySelector('footer.ticker');
+        if (!ticker) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'motion-toggle';
+        btn.addEventListener('click', () => {
+            const paused = !motionPaused();
+            setMotionPaused(paused);
+            try { localStorage.setItem('motion', paused ? 'paused' : 'running'); } catch (e) { /* this page view only */ }
+        });
+        ticker.appendChild(btn);
+        setMotionPaused(motionPaused());
     }
 
     /* ---- Clock ---- */
@@ -123,13 +169,15 @@
         if (document.fonts) document.fonts.ready.then(setRowMarqueeSpeeds);
     }
 
-    // Row tracks are display:none until hover, so measure them briefly shown; ~80px/s like the ticker
+    // Row tracks are display:none until hover, so measure them briefly shown; ~80px/s like the ticker.
+    // Show all, read all, then write all: one layout pass instead of one per row.
     function setRowMarqueeSpeeds() {
-        document.querySelectorAll('.index-row .marquee-track').forEach(track => {
-            track.style.display = 'inline-flex';
-            const half = track.scrollWidth / 2;
+        const tracks = Array.from(document.querySelectorAll('.index-row .marquee-track'));
+        tracks.forEach(track => { track.style.display = 'inline-flex'; });
+        const halves = tracks.map(track => track.scrollWidth / 2);
+        tracks.forEach((track, i) => {
             track.style.display = '';
-            if (half) track.style.setProperty('--marquee-duration', (half / 80) + 's');
+            if (halves[i]) track.style.setProperty('--marquee-duration', (halves[i] / 80) + 's');
         });
     }
 
@@ -164,9 +212,9 @@
         document.querySelectorAll('[data-scramble]').forEach(el => {
             el.dataset.text = el.textContent.trim();
             el.setAttribute('aria-label', el.dataset.text);
-            if (reducedMotion) return;
+            if (reducedMotion || motionPaused()) return;
             scramble(el);
-            el.addEventListener('mouseenter', () => scramble(el));
+            el.addEventListener('mouseenter', () => { if (!motionPaused()) scramble(el); });
         });
     }
 
@@ -193,6 +241,8 @@
     updateToggleLabels();
     document.addEventListener('DOMContentLoaded', () => {
         updateToggleLabels();
+        syncThemeColor();
+        initMotionToggle();
         initClock();
         initMarquees();
         initIndexRows();

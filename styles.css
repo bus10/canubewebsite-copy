@@ -60,7 +60,7 @@ body {
     background: var(--bg-color);
     color: var(--text-color);
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 0.8125rem; /* 13px */
     line-height: 1.5;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -123,7 +123,7 @@ h1 {
     padding: var(--s2) var(--s3);
     background: var(--bg-color);
     border-bottom: var(--rule) solid var(--border-color);
-    font-size: 11px;
+    font-size: 0.6875rem; /* 11px */
 }
 
 .topbar-home {
@@ -150,6 +150,30 @@ h1 {
 .theme-toggle {
     padding: var(--s1) var(--s2);
     border: var(--rule) solid var(--border-color);
+}
+
+/* Touch: 44px hit areas without making the bar taller */
+@media (pointer: coarse) {
+    .topbar {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .topbar a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    .theme-toggle {
+        position: relative;
+    }
+
+    .theme-toggle::after {
+        content: "";
+        position: absolute;
+        inset: -8px -4px;
+    }
 }
 
 @media (hover: hover) {
@@ -199,7 +223,7 @@ h1 {
 
 .meta {
     margin-top: var(--s3);
-    font-size: 11px;
+    font-size: 0.6875rem; /* 11px */
     opacity: var(--muted);
 }
 
@@ -228,14 +252,48 @@ h1 {
     animation-play-state: paused;
 }
 
+[data-motion="paused"] .marquee-track,
+[data-motion="paused"] .live-dot {
+    animation-play-state: paused;
+}
+
 @keyframes marquee {
     to { transform: translateX(-50%); }
 }
 
 .ticker {
+    position: relative;
     padding: var(--s2) 0;
     border-top: var(--rule) solid var(--border-color);
-    font-size: 11px;
+    font-size: 0.6875rem; /* 11px */
+}
+
+/* Pause control pinned over the ticker's right end (injected by site.js) */
+.motion-toggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 var(--s3);
+    background: var(--bg-color);
+    border-left: var(--rule) solid var(--border-color);
+}
+
+@media (hover: hover) {
+    .motion-toggle:hover {
+        background: var(--text-color);
+        color: var(--bg-color);
+    }
+}
+
+.motion-toggle:focus-visible {
+    outline-offset: -6px;
+}
+
+@media (pointer: coarse) {
+    .ticker {
+        padding: 14px 0;
+    }
 }
 
 /* ---- Index rows (landing, time machine) ---- */
@@ -249,11 +307,12 @@ h1 {
 }
 
 .index-num {
-    font-size: 11px;
+    font-size: 0.6875rem; /* 11px */
 }
 
 .index-title {
     --marquee-duration: 12s;
+    position: relative;
     display: block;
     overflow: hidden;
     white-space: nowrap;
@@ -278,11 +337,17 @@ h1 {
     outline-offset: -6px;
 }
 
-.index-row.has-marquee:focus-visible .index-title-text {
-    display: none;
+/* While the marquee shows, the static title is only visually hidden:
+   it stays the link's accessible name (the track is aria-hidden) */
+:root:not([data-motion="paused"]) .index-row.has-marquee:focus-visible .index-title-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
 }
 
-.index-row:focus-visible .marquee-track {
+:root:not([data-motion="paused"]) .index-row:focus-visible .marquee-track {
     display: inline-flex;
 }
 
@@ -293,11 +358,15 @@ h1 {
         color: var(--bg-color);
     }
 
-    .index-row.has-marquee:hover .index-title-text {
-        display: none;
+    :root:not([data-motion="paused"]) .index-row.has-marquee:hover .index-title-text {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
     }
 
-    .index-row:hover .marquee-track {
+    :root:not([data-motion="paused"]) .index-row:hover .marquee-track {
         display: inline-flex;
     }
 }
@@ -307,7 +376,7 @@ h1 {
     display: inline-block;
     padding: var(--s2) var(--s4);
     border: var(--rule) solid var(--border-color);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.4;
     text-align: center;
 }
@@ -359,7 +428,7 @@ h1 {
 .stat-label {
     display: block;
     margin-bottom: var(--s2);
-    font-size: 11px;
+    font-size: 0.6875rem; /* 11px */
     opacity: var(--muted);
 }
 
@@ -375,7 +444,7 @@ h1 {
 /* ---- Loading status ---- */
 .loading {
     margin: var(--s4) 0;
-    font-size: 11px;
+    font-size: 0.6875rem; /* 11px */
 }
 
 .loading-bar {
@@ -397,7 +466,8 @@ h1 {
 @media (max-width: 600px) {
     .topbar {
         gap: var(--s2);
-        padding: var(--s2);
+        padding-left: var(--s2);
+        padding-right: var(--s2);
     }
 
     .index-title {
@@ -466,7 +536,7 @@ h1 {
 .game-status {
     min-height: 1.5em;
     margin-bottom: var(--s3);
-    font-size: 15px;
+    font-size: 0.9375rem;
     font-weight: 700;
 }
 
@@ -514,7 +584,7 @@ h1 {
     min-height: 120px;
     padding: var(--s4);
     border: var(--rule) solid var(--border-color);
-    font-size: 18px;
+    font-size: 1.125rem;
     line-height: 1.8;
     letter-spacing: 0.02em;
     text-transform: none; /* show words exactly as they must be typed */
@@ -536,7 +606,7 @@ h1 {
 
 .instruction-text {
     margin-top: var(--s3);
-    font-size: 11px;
+    font-size: 0.6875rem; /* 11px */
     opacity: var(--muted);
 }
 
@@ -565,6 +635,6 @@ h1 {
 @media (max-width: 600px) {
     .words-container {
         padding: var(--s3);
-        font-size: 16px;
+        font-size: 1rem;
     }
 }

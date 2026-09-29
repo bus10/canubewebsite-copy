@@ -588,6 +588,81 @@ test('review:row-marquee-speed', () => withPage('index', {}, async ({ page }) =>
     assert(speeds.every(s => s > 0 && s <= 100), 'row marquee speeds (px/s) should be ~80: ' + speeds.join(','));
 }));
 
+// ---- Audit fixes ----
+test('audit:row-name-on-focus', () => withPage('index', {}, async ({ page }) => {
+    for (let i = 0; i < 3; i++) await page.keyboard.press('Tab');
+    const snap = await page.locator('nav.index').ariaSnapshot();
+    assert(snap.includes('link "01 MUSIC PLAYER"'), 'focused row lost its accessible name:\n' + snap);
+    const track = await page.locator('.index-row').first().locator('.marquee-track').evaluate(t => getComputedStyle(t).display);
+    assert(track === 'inline-flex', 'focused row marquee not showing');
+}));
+
+test('audit:row-name-on-hover', () => withPage('index', {}, async ({ page }) => {
+    await page.locator('.index-row').nth(1).hover();
+    const snap = await page.locator('nav.index').ariaSnapshot();
+    assert(snap.includes('link "02 BENEVOLENT INEQUALITY"'), 'hovered row lost its accessible name:\n' + snap);
+}));
+
+test('audit:motion-pause', () => withPage('index', {}, async ({ page }) => {
+    assert(await page.textContent('.motion-toggle') === '[PAUSE]', 'motion toggle missing or mislabelled');
+    await page.click('.motion-toggle');
+    const r = await page.evaluate(() => ({
+        attr: document.documentElement.dataset.motion,
+        ticker: getComputedStyle(document.querySelector('.ticker .marquee-track')).animationPlayState,
+        dot: getComputedStyle(document.querySelector('.live-dot')).animationPlayState,
+        label: document.querySelector('.motion-toggle').textContent,
+        saved: localStorage.getItem('motion'),
+    }));
+    assert(r.attr === 'paused' && r.ticker === 'paused' && r.dot === 'paused', 'pause did not stop motion: ' + JSON.stringify(r));
+    assert(r.label === '[PLAY]' && r.saved === 'paused', 'pause state not labelled/saved: ' + JSON.stringify(r));
+    await page.locator('.index-row').first().hover();
+    assert(await page.locator('.index-row').first().locator('.index-title-text').isVisible(), 'row swapped to marquee while paused');
+    await page.reload();
+    assert(await page.getAttribute('html', 'data-motion') === 'paused', 'pause not restored on reload');
+    assert(await page.textContent('h1') === 'CAN U BE', 'heading scrambled while paused');
+}));
+
+test('audit:no-motion-toggle-when-reduced', () => withPage('index', { reducedMotion: 'reduce' }, async ({ page }) => {
+    assert(await page.locator('.motion-toggle').count() === 0, 'motion toggle shown under reduced motion');
+}));
+
+test('audit:toggle-label-in-name', () => withPage('index', {}, async ({ page }) => {
+    const r = await page.evaluate(() => ({ label: document.querySelector('.theme-toggle').getAttribute('aria-label') }));
+    assert(r.label === null, 'theme toggle aria-label overrides its visible text');
+}));
+
+test('audit:theme-color', () => withPage('index', {}, async ({ page }) => {
+    const read = () => page.getAttribute('meta[name="theme-color"]', 'content');
+    const dark = await read();
+    await page.click('.theme-toggle');
+    const light = await read();
+    assert(dark === '#000' && light === '#fff', `theme-color not following theme: ${dark} -> ${light}`);
+}));
+
+test('audit:og-image', () => withPage('index', {}, async ({ page }) => {
+    const src = await page.getAttribute('meta[property="og:image"]', 'content');
+    assert(src.endsWith('/images/og.png') && existsSync(path.join(ROOT, 'images', 'og.png')), 'og:image missing: ' + src);
+}));
+
+for (const key of ['index', 'snake']) {
+    test(`audit:touch-targets:${key}`, () => withPage(key, { width: 375, touch: true }, async ({ page }) => {
+        await page.waitForTimeout(300);
+        const r = await page.evaluate(() => {
+            const bar = document.querySelector('.topbar');
+            const out = [...bar.querySelectorAll('a, button'), document.querySelector('.motion-toggle')].map(el => {
+                const box = el.getBoundingClientRect();
+                const after = getComputedStyle(el, '::after');
+                const extra = after.content !== 'none' ? -parseFloat(after.top) - parseFloat(after.bottom) : 0;
+                return [el.className, Math.round(box.height + extra)];
+            });
+            return { out, barH: Math.round(bar.getBoundingClientRect().height), overflow: bar.scrollWidth - bar.clientWidth };
+        });
+        assert(r.out.every(([, h]) => h >= 44), 'topbar targets under 44px: ' + JSON.stringify(r.out));
+        assert(r.overflow <= 0, 'topbar overflows at 375px by ' + r.overflow);
+        assert(r.barH <= 50, 'topbar wraps onto more than one line at 375px: ' + r.barH + 'px');
+    }));
+}
+
 // ==== RUNNER ====
 async function shots() {
     const dir = path.join(ROOT, 'tools', 'shots');
