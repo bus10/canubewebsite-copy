@@ -1,86 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Busify Podcast - Can U Be</title>
-    <meta name="description" content="Busify podcast - launching January 6, 2026. Deep conversations and insights.">
+    <meta name="description" content="Busify podcast - launching October 31, 2026. Deep conversations and insights.">
     <meta property="og:title" content="Busify Podcast">
-    <meta property="og:description" content="Launching January 6, 2026 - Deep conversations and insights">
+    <meta property="og:description" content="Launching October 31, 2026 - Deep conversations and insights">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://bus10.github.io/busify.html">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <script>try{if(localStorage.getItem('theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <button class="theme-toggle" onclick="toggleTheme()">Light</button>
-    
-    <div class="container center">
-        <a href="index.html" class="nav-link" tabindex="0" aria-label="Back to home">← Back</a>
-        
-        <h1 class="hero-title">BUSIFY</h1>
-        <h2 class="subtitle">PODCAST</h2>
-        
-        <div class="coming-soon">
-            <div class="status-text">LAUNCHING 1/6/26</div>
-            <div class="countdown" id="countdown">
-                <div class="countdown-item">
-                    <span class="countdown-value" id="days">0</span>
-                    <span class="countdown-label">DAYS</span>
-                </div>
-                <div class="countdown-item">
-                    <span class="countdown-value" id="hours">0</span>
-                    <span class="countdown-label">HRS</span>
-                </div>
-                <div class="countdown-item">
-                    <span class="countdown-value" id="minutes">0</span>
-                    <span class="countdown-label">MIN</span>
-                </div>
-                <div class="countdown-item">
-                    <span class="countdown-value" id="seconds">0</span>
-                    <span class="countdown-label">SEC</span>
-                </div>
-            </div>
-            <div class="description">
-                Deep conversations and insights.<br>
-                Mark your calendar for the premiere.
-            </div>
+    <header class="topbar">
+        <a href="index.html" class="topbar-home">CAN U BE</a>
+        <span class="live-dot" aria-hidden="true">●</span>
+        <time class="clock" aria-label="Current time">00:00:00</time>
+        <a href="index.html" class="topbar-back">← INDEX</a>
+        <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle theme">[LIGHT]</button>
+    </header>
+
+    <main class="page">
+        <div class="page-head">
+            <h1 data-scramble>BUSIFY</h1>
+            <p class="meta">03 / PODCAST</p>
         </div>
-        
-        <div class="footer spaced">
-            Website made by @bus0
+
+        <div class="band marquee" id="launchBand">
+            <div class="marquee-track"><span>LAUNCHING 10.31.26&nbsp;·&nbsp;</span></div>
         </div>
-    </div>
-    
-    <script src="theme.js"></script>
+
+        <div class="stat-row" id="countdown">
+            <div class="stat"><span class="stat-label">DAYS</span><span class="stat-value" id="days">00</span></div>
+            <div class="stat"><span class="stat-label">HRS</span><span class="stat-value" id="hours">00</span></div>
+            <div class="stat"><span class="stat-label">MIN</span><span class="stat-value" id="minutes">00</span></div>
+            <div class="stat"><span class="stat-label">SEC</span><span class="stat-value" id="seconds">00</span></div>
+        </div>
+
+        <p class="copy">Deep conversations and insights.<br>Mark your calendar for the premiere.</p>
+    </main>
+
+    <footer class="ticker marquee" aria-label="Website made by @bus0">
+        <div class="marquee-track"><span>WEBSITE MADE BY @BUS0&nbsp;·&nbsp;</span><span>CAN U BE&nbsp;·&nbsp;</span></div>
+    </footer>
+
+    <script src="site.js"></script>
     <script>
-        // Countdown to January 6, 2026 at 12:00 AM MST (7:00 AM UTC)
-        const launchDate = new Date('2026-01-06T07:00:00Z').getTime();
-        
+        // Countdown to October 31, 2026 at 12:00 AM MST (7:00 AM UTC)
+        const launchDate = new Date('2026-10-31T07:00:00Z').getTime();
+        const fields = ['days', 'hours', 'minutes', 'seconds'].map(id => document.getElementById(id));
+        const pad = n => String(n).padStart(2, '0');
+        let countdownInterval = null;
+
+        // Returns true once the launch has passed (and the countdown is finished)
         function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = launchDate - now;
-            
-            if (distance < 0) {
-                document.getElementById('countdown').innerHTML = '<div class="status-text">LIVE NOW!</div>';
+            const distance = launchDate - Date.now();
+
+            if (distance <= 0) {
+                fields.forEach(el => { el.textContent = '00'; });
+                setMarqueeText(document.getElementById('launchBand'), 'LIVE NOW · ');
                 clearInterval(countdownInterval);
-                return;
+                return true;
             }
-            
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            
-            document.getElementById('days').textContent = days;
-            document.getElementById('hours').textContent = hours;
-            document.getElementById('minutes').textContent = minutes;
-            document.getElementById('seconds').textContent = seconds;
+
+            const parts = [
+                Math.floor(distance / (1000 * 60 * 60 * 24)),
+                Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+                Math.floor((distance % (1000 * 60)) / 1000)
+            ];
+            parts.forEach((value, i) => { fields[i].textContent = pad(value); });
+            return false;
         }
-        
+
         // Update immediately and then every second
-        updateCountdown();
-        const countdownInterval = setInterval(updateCountdown, 1000);
+        if (!updateCountdown()) countdownInterval = setInterval(updateCountdown, 1000);
     </script>
 </body>
 </html>

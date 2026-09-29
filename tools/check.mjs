@@ -361,6 +361,37 @@ test('focus:audio-play-hides-loading', () => withPage('bi', {
     assert(await page.isHidden('#loading'), 'loading still visible after play');
 }));
 
+// ---- Task 3: Busify ----
+shellTests('busify');
+
+const countdownValues = page => page.$$eval('#countdown .stat-value', els => els.map(e => e.textContent.trim()));
+const bandText = page => page.textContent('#launchBand .marquee-track');
+
+test('busify:countdown', () => withPage('busify', { fixedTime: '2026-10-29T05:59:30Z' }, async ({ page }) => {
+    await page.waitForTimeout(200);
+    const values = await countdownValues(page);
+    // 2026-10-31T07:00:00Z − 2026-10-29T05:59:30Z = 2d 1h 0m 30s
+    assert(JSON.stringify(values) === '["02","01","00","30"]', 'countdown: ' + JSON.stringify(values));
+    const labels = await page.$$eval('#countdown .stat-label', els => els.map(e => e.textContent.trim()));
+    assert(JSON.stringify(labels) === '["DAYS","HRS","MIN","SEC"]', 'labels: ' + JSON.stringify(labels));
+    assert((await bandText(page)).includes('LAUNCHING 10.31.26'), 'band missing launch text');
+    const desc = await page.getAttribute('meta[name="description"]', 'content');
+    assert(desc.includes('October 31, 2026'), 'meta description not updated: ' + desc);
+}));
+
+test('busify:live', () => withPage('busify', { fixedTime: '2026-11-01T00:00:00Z' }, async ({ page }) => {
+    await page.waitForTimeout(200);
+    assert(JSON.stringify(await countdownValues(page)) === '["00","00","00","00"]', 'expired digits not 00');
+    const text = await bandText(page);
+    assert(text.includes('LIVE NOW') && !text.includes('LAUNCHING'), 'band not switched to LIVE NOW: ' + text);
+    await page.evaluate(() => document.fonts.ready); // let the one legitimate fonts.ready rebuild happen first
+    await page.waitForTimeout(100);
+    await page.evaluate(() => { window.__first = document.querySelector('#launchBand .marquee-track').firstElementChild; });
+    await page.waitForTimeout(2500);
+    const same = await page.evaluate(() => document.querySelector('#launchBand .marquee-track').firstElementChild === window.__first);
+    assert(same, 'band is being rebuilt every tick after expiry');
+}));
+
 // ==== RUNNER ====
 async function shots() {
     const dir = path.join(ROOT, 'tools', 'shots');
