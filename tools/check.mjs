@@ -145,6 +145,175 @@ test('harness:smoke', () => withPage('index', {}, async ({ page }) => {
 
 // ==== TESTS (tasks append below this line) ====
 
+// ---- Task 1: design system + landing ----
+shellTests('index');
+
+test('fonts:loaded', () => withPage('index', {}, async ({ page }) => {
+    const loaded = await page.evaluate(async () => {
+        await document.fonts.ready;
+        const families = [...document.fonts].filter(f => f.status === 'loaded').map(f => f.family.replace(/["']/g, ''));
+        return { anton: families.includes('Anton'), mono: families.includes('JetBrains Mono') };
+    });
+    assert(loaded.anton && loaded.mono, 'web fonts not loaded (needs network): ' + JSON.stringify(loaded));
+}));
+
+test('theme:toggle-persists', () => withPage('index', {}, async ({ page }) => {
+    assert(await page.textContent('.theme-toggle') === '[LIGHT]', 'dark-mode label should be [LIGHT]');
+    await page.click('.theme-toggle');
+    assert(await page.getAttribute('html', 'data-theme') === 'light', 'html[data-theme] not light after toggle');
+    assert(await page.textContent('.theme-toggle') === '[DARK]', 'light-mode label should be [DARK]');
+    const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    assert(bg === 'rgb(255, 255, 255)', 'body background not white in light mode: ' + bg);
+    await page.reload();
+    assert(await page.getAttribute('html', 'data-theme') === 'light', 'theme not persisted across reload');
+    assert(await page.textContent('.theme-toggle') === '[DARK]', 'label wrong after reload in light mode');
+    await page.click('.theme-toggle');
+    assert(await page.getAttribute('html', 'data-theme') === null, 'toggling back to dark failed');
+}));
+
+test('theme:event-and-colors', () => withPage('index', {}, async ({ page }) => {
+    await page.evaluate(() => {
+        window.__themeEvents = [];
+        document.addEventListener('themechange', e => window.__themeEvents.push(e.detail.theme));
+    });
+    const dark = await page.evaluate(() => themeColors());
+    assert(dark.bg === '#000' && dark.fg === '#fff', 'themeColors() in dark: ' + JSON.stringify(dark));
+    await page.click('.theme-toggle');
+    const light = await page.evaluate(() => themeColors());
+    assert(light.bg === '#fff' && light.fg === '#000', 'themeColors() in light: ' + JSON.stringify(light));
+    await page.click('.theme-toggle');
+    const events = await page.evaluate(() => window.__themeEvents);
+    assert(JSON.stringify(events) === '["light","dark"]', 'themechange events: ' + JSON.stringify(events));
+}));
+
+test('theme:hard-cut', () => withPage('index', {}, async ({ page }) => {
+    const d = await page.evaluate(() => getComputedStyle(document.body).transitionDuration);
+    assert(d === '0s', 'body has a color transition: ' + d);
+}));
+
+test('motion:clock', () => withPage('index', {}, async ({ page }) => {
+    const first = await page.textContent('.clock');
+    assert(/^\d\d:\d\d:\d\d$/.test(first), 'clock format wrong: ' + first);
+    await page.waitForTimeout(1200);
+    assert(await page.textContent('.clock') !== first, 'clock did not tick');
+}));
+
+test('motion:ticker', () => withPage('index', {}, async ({ page }) => {
+    const r = await page.evaluate(() => {
+        const t = document.querySelector('.ticker .marquee-track');
+        return { n: t.children.length, anim: getComputedStyle(t).animationName, w: t.scrollWidth, cw: t.parentElement.clientWidth };
+    });
+    assert(r.anim === 'marquee', 'ticker not animating: ' + r.anim);
+    assert(r.n >= 4 && r.w >= 2 * r.cw, `ticker not filled + duplicated (children ${r.n}, width ${r.w}, container ${r.cw})`);
+}));
+
+test('motion:scramble', () => withPage('index', {}, async ({ page }) => {
+    assert(await page.getAttribute('h1', 'aria-label') === 'CAN U BE', 'h1 aria-label should be the real text');
+    await page.waitForTimeout(900);
+    assert(await page.textContent('h1') === 'CAN U BE', 'scramble did not resolve to real text');
+}));
+
+test('motion:reduced', () => withPage('index', { reducedMotion: 'reduce' }, async ({ page }) => {
+    const r = await page.evaluate(() => ({
+        ticker: getComputedStyle(document.querySelector('.ticker .marquee-track')).animationName,
+        dot: getComputedStyle(document.querySelector('.live-dot')).animationName,
+        h1: document.querySelector('h1').textContent,
+        rowMarquee: !!document.querySelector('.index-row .marquee-track'),
+    }));
+    assert(r.ticker === 'none' && r.dot === 'none', 'animations running under reduced motion');
+    assert(r.h1 === 'CAN U BE', 'h1 scrambled under reduced motion: ' + r.h1);
+    assert(!r.rowMarquee, 'index rows built marquees under reduced motion');
+    await page.locator('.index-row').first().hover();
+    const visible = await page.locator('.index-row').first().locator('.index-title-text').isVisible();
+    assert(visible, 'row title disappears on hover under reduced motion');
+}));
+
+test('motion:cursor', () => withPage('index', {}, async ({ page }) => {
+    await page.mouse.move(200, 300);
+    const r = await page.evaluate(() => {
+        const c = document.querySelector('.cursor');
+        return c && { pe: getComputedStyle(c).pointerEvents, blend: getComputedStyle(c).mixBlendMode };
+    });
+    assert(r, '.cursor missing on a fine-pointer device');
+    assert(r.pe === 'none' && r.blend === 'difference', 'cursor styles wrong: ' + JSON.stringify(r));
+}));
+
+test('index:rows', () => withPage('index', {}, async ({ page }) => {
+    const rows = await page.$$eval('.index-row', els => els.map(e => [
+        e.getAttribute('href'),
+        e.querySelector('.index-num').textContent.trim(),
+        e.querySelector('.index-title-text').textContent.trim(),
+    ]));
+    const expected = [
+        ['index1.html', '01', 'MUSIC PLAYER'],
+        ['benevolent-inequality.html', '02', 'BENEVOLENT INEQUALITY'],
+        ['busify.html', '03', 'BUSIFY PODCAST'],
+        ['snake.html', '04', 'SNAKE'],
+        ['plinko.html', '05', 'PLINKO'],
+        ['tictactoe.html', '06', 'TIC TAC TOE'],
+        ['type speed test/index.html', '07', 'TYPE SPEED TEST'],
+        ['time-machine.html', '08', 'TIME MACHINE'],
+    ];
+    assert(JSON.stringify(rows) === JSON.stringify(expected), 'rows: ' + JSON.stringify(rows));
+}));
+
+test('index:row-hover', () => withPage('index', {}, async ({ page }) => {
+    const row = page.locator('.index-row').nth(1);
+    await row.hover();
+    const r = await row.evaluate(e => {
+        const t = e.querySelector('.marquee-track');
+        return { bg: getComputedStyle(e).backgroundColor, display: t && getComputedStyle(t).display, anim: t && getComputedStyle(t).animationName };
+    });
+    assert(r.bg === 'rgb(255, 255, 255)', 'hovered row not inverted: ' + r.bg);
+    assert(r.display === 'inline-flex' && r.anim === 'marquee', 'row marquee not running on hover: ' + JSON.stringify(r));
+}));
+
+test('a11y:tab-order', () => withPage('index', {}, async ({ page }) => {
+    await page.keyboard.press('Tab'); // .topbar-home
+    await page.keyboard.press('Tab'); // .theme-toggle
+    await page.keyboard.press('Tab'); // first .index-row
+    const r = await page.evaluate(() => {
+        const a = document.activeElement;
+        const cs = getComputedStyle(a);
+        return { cls: a.className, outline: cs.outlineStyle, bg: cs.backgroundColor };
+    });
+    assert(r.cls.includes('index-row'), 'third Tab should land on first index row, got: ' + r.cls);
+    assert(r.outline === 'dashed', 'focused row has no dashed outline');
+    assert(r.bg === 'rgb(255, 255, 255)', 'focused row not inverted');
+}));
+
+test('focus:localstorage-blocked', () => withPage('index', {
+    initScript: () => Object.defineProperty(window, 'localStorage', {
+        configurable: true,
+        get() { throw new DOMException('blocked', 'SecurityError'); },
+    }),
+}, async ({ page, errors }) => {
+    await page.click('.theme-toggle');
+    assert(await page.getAttribute('html', 'data-theme') === 'light', 'toggle failed when localStorage is blocked');
+    assert(errors.length === 0, 'errors with blocked localStorage: ' + errors.join(' | '));
+}));
+
+test('focus:cursor-no-intercept', () => withPage('index', {}, async ({ page }) => {
+    await page.locator('.index-row').nth(3).scrollIntoViewIfNeeded();
+    const box = await page.locator('.index-row').nth(3).boundingBox();
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(x, y);
+    await page.waitForTimeout(100);
+    await page.mouse.click(x, y);
+    await page.waitForURL(/snake\.html$/, { timeout: 3000 });
+}));
+
+test('focus:rapid-rehover', () => withPage('index', {}, async ({ page }) => {
+    for (let i = 0; i < 6; i++) {
+        await page.hover('h1');
+        await page.mouse.move(5, 5);
+        await page.waitForTimeout(60);
+    }
+    await page.waitForTimeout(900);
+    assert(await page.textContent('h1') === 'CAN U BE', 'heading stuck scrambled after rapid re-hover');
+}));
+
 // ==== RUNNER ====
 async function shots() {
     const dir = path.join(ROOT, 'tools', 'shots');

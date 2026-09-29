@@ -6,7 +6,6 @@
     <title>Can U Be</title>
     <meta name="description" content="Can U Be – games, music experiments, archives, and the Busify podcast. A brutalist playground by @bus0.">
     <meta name="robots" content="index,follow">
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <link rel="canonical" href="https://bus10.github.io/">
     <!-- Open Graph -->
     <meta property="og:title" content="Can U Be">
@@ -18,30 +17,40 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Can U Be">
     <meta name="twitter:description" content="Games, music rotations, archives & Busify podcast.">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <script>try{if(localStorage.getItem('theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <button class="theme-toggle" onclick="toggleTheme()">Light</button>
-    
-    <div class="container">
-        <h1 class="hero-title">Can U Be</h1>
-        
-        <div class="nav-links">
-            <a href="index1.html" class="nav-link block">Music Player</a>
-            <a href="benevolent-inequality.html" class="nav-link block">BENEVOLENT INEQUALITY</a>
-            <a href="busify.html" class="nav-link block">BUSIFY PODCAST</a>
-            <a href="snake.html" class="nav-link block">Snake Game</a>
-            <a href="plinko.html" class="nav-link block">Plinko</a>
-            <a href="tictactoe.html" class="nav-link block">Tic Tac Toe</a>
-            <a href="type speed test/index.html" class="nav-link block">Type Speed Test</a>
-            <a href="time-machine.html" class="nav-link block">Time Machine</a>
-        </div>
-        
-        <div class="footer spaced">
-            Website made by @bus0
-        </div>
-    </div>
-    
-    <script src="theme.js"></script>
+    <header class="topbar">
+        <a href="index.html" class="topbar-home">CAN U BE</a>
+        <span class="live-dot" aria-hidden="true">●</span>
+        <time class="clock" aria-label="Current time">00:00:00</time>
+        <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle theme">[LIGHT]</button>
+    </header>
+
+    <main class="page page--wide">
+        <h1 class="hero" data-scramble>CAN U BE</h1>
+
+        <nav class="index" aria-label="Sections">
+            <a class="index-row" href="index1.html"><span class="index-num">01</span><span class="index-title">MUSIC PLAYER</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+            <a class="index-row" href="benevolent-inequality.html"><span class="index-num">02</span><span class="index-title">BENEVOLENT INEQUALITY</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+            <a class="index-row" href="busify.html"><span class="index-num">03</span><span class="index-title">BUSIFY PODCAST</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+            <a class="index-row" href="snake.html"><span class="index-num">04</span><span class="index-title">SNAKE</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+            <a class="index-row" href="plinko.html"><span class="index-num">05</span><span class="index-title">PLINKO</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+            <a class="index-row" href="tictactoe.html"><span class="index-num">06</span><span class="index-title">TIC TAC TOE</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+            <a class="index-row" href="type speed test/index.html"><span class="index-num">07</span><span class="index-title">TYPE SPEED TEST</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+            <a class="index-row" href="time-machine.html"><span class="index-num">08</span><span class="index-title">TIME MACHINE</span><span class="index-arrow" aria-hidden="true">↗</span></a>
+        </nav>
+    </main>
+
+    <footer class="ticker marquee" aria-label="Website made by @bus0">
+        <div class="marquee-track"><span>WEBSITE MADE BY @BUS0&nbsp;·&nbsp;</span><span>CAN U BE&nbsp;·&nbsp;</span></div>
+    </footer>
+
+    <script src="site.js"></script>
 </body>
 </html>
