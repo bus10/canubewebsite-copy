@@ -45,6 +45,7 @@ const PAGES = {
     ttt: 'tictactoe.html',
     type: 'type%20speed%20test/index.html',
     tm: 'time-machine.html',
+    v3: 'v3.html',
     notfound: '404.html',
 };
 
@@ -241,6 +242,7 @@ test('index:rows', () => withPage('index', {}, async ({ page }) => {
         e.querySelector('.index-title-text').textContent.trim(),
     ]));
     const expected = [
+        ['v3.html', '00', 'A NOTE ON V3'],
         ['index1.html', '01', 'MUSIC PLAYER'],
         ['benevolent-inequality.html', '02', 'BENEVOLENT INEQUALITY'],
         ['busify.html', '03', 'BUSIFY PODCAST'],
@@ -290,8 +292,8 @@ test('focus:localstorage-blocked', () => withPage('index', {
 }));
 
 test('focus:cursor-no-intercept', () => withPage('index', {}, async ({ page }) => {
-    await page.locator('.index-row').nth(3).scrollIntoViewIfNeeded();
-    const box = await page.locator('.index-row').nth(3).boundingBox();
+    await page.locator('.index-row').nth(4).scrollIntoViewIfNeeded();
+    const box = await page.locator('.index-row').nth(4).boundingBox();
     const x = box.x + box.width / 2;
     const y = box.y + box.height / 2;
     await page.mouse.move(x, y);
@@ -314,16 +316,123 @@ test('focus:rapid-rehover', () => withPage('index', {}, async ({ page }) => {
 shellTests('music');
 shellTests('bi');
 
-test('music:player', () => withPage('music', {}, async ({ page }) => {
+// Silent mono 16-bit PCM WAV, small enough to decode instantly
+function wav(seconds = 0.3, rate = 8000) {
+    const n = Math.round(seconds * rate);
+    const b = Buffer.alloc(44 + n * 2);
+    b.write('RIFF', 0); b.writeUInt32LE(36 + n * 2, 4); b.write('WAVE', 8);
+    b.write('fmt ', 12); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
+    b.writeUInt32LE(rate, 24); b.writeUInt32LE(rate * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34);
+    b.write('data', 36); b.writeUInt32LE(n * 2, 40);
+    return b;
+}
+const wavFile = name => ({ name, mimeType: 'audio/wav', buffer: wav() });
+
+// Snapshot of the upload player's visible state
+const playerState = page => page.evaluate(() => {
+    const audio = document.getElementById('audioPlayer');
+    return {
+        rows: [...document.querySelectorAll('#queue .queue-item')].map(b => [...b.children].map(c => c.textContent).join(' ')),
+        current: [...document.querySelectorAll('#queue .queue-item')].findIndex(b => b.getAttribute('aria-current') === 'true'),
+        errors: [...document.querySelectorAll('#queue .queue-item')].map(b => b.classList.contains('is-error')),
+        status: document.getElementById('playerStatus').textContent.trim(),
+        note: document.getElementById('playerNote').hidden ? '' : document.getElementById('playerNote').textContent.trim(),
+        audioHidden: audio.hidden,
+        src: audio.getAttribute('src') || '',
+        prev: document.getElementById('prevBtn').disabled,
+        next: document.getElementById('nextBtn').disabled,
+        controlsHidden: document.getElementById('playerControls').hidden,
+    };
+});
+
+test('music:player', () => withPage('music', {}, async ({ page, requests }) => {
     const r = await page.evaluate(() => ({
         meta: document.querySelector('.page-head .meta')?.textContent.trim(),
-        source: !!document.querySelector('main audio#audioPlayer[controls] source[src="audio/canube.mp3"]'),
+        input: !!document.querySelector('main .dropzone input#fileInput[type="file"][accept="audio/*"][multiple]'),
+        label: document.querySelector('.dropzone')?.textContent.replace(/\s+/g, ' ').trim(),
         mainVisible: getComputedStyle(document.querySelector('main')).display !== 'none',
     }));
     assert(r.meta === '01 / MUSIC PLAYER', 'meta line: ' + r.meta);
-    assert(r.source, 'audio#audioPlayer with canube.mp3 source missing');
-    assert(r.mainVisible, 'main content hidden while loading');
-    await page.waitForSelector('#loading', { state: 'hidden', timeout: 8000 });
+    assert(r.input, 'file input (audio/*, multiple) inside .dropzone missing');
+    assert(r.label.includes('ADD FILES'), 'dropzone label: ' + r.label);
+    assert(r.mainVisible, 'main content hidden');
+    const s = await playerState(page);
+    assert(s.status === 'NO FILES LOADED', 'empty status: ' + s.status);
+    assert(s.rows.length === 0 && s.audioHidden && s.controlsHidden, 'empty state should hide audio + controls');
+    assert(!requests.some(u => u.endsWith('.mp3')), 'page still requests a hosted mp3');
+}));
+
+test('music:queue', () => withPage('music', {}, async ({ page, errors }) => {
+    await page.setInputFiles('#fileInput', [wavFile('First Song.wav'), wavFile('second.WAV')]);
+    let s = await playerState(page);
+    assert(JSON.stringify(s.rows) === '["01 First Song","02 second"]', 'rows: ' + JSON.stringify(s.rows));
+    assert(s.current === 0, 'first track should be current, got ' + s.current);
+    assert(s.src.startsWith('blob:'), 'audio src should be an object URL: ' + s.src);
+    assert(!s.audioHidden && !s.controlsHidden, 'audio/controls should show once loaded');
+    assert(s.status === 'NOW PLAYING: First Song', 'status: ' + s.status);
+    assert(s.prev && !s.next, 'prev disabled / next enabled on first track');
+    const rowCase = await page.$eval('#queue .queue-name', el => getComputedStyle(el).textTransform);
+    assert(rowCase === 'none', 'queue names must keep their case');
+
+    await page.click('#nextBtn');
+    s = await playerState(page);
+    assert(s.current === 1 && !s.prev && s.next, 'NEXT should move to track 2: ' + JSON.stringify(s));
+
+    await page.evaluate(() => document.getElementById('audioPlayer').dispatchEvent(new Event('ended')));
+    s = await playerState(page);
+    assert(s.current === 1, 'ending the last track should not wrap');
+
+    await page.click('#queue li:first-child .queue-item');
+    assert((await playerState(page)).current === 0, 'clicking a row should jump to it');
+    await page.evaluate(() => document.getElementById('audioPlayer').dispatchEvent(new Event('ended')));
+    assert((await playerState(page)).current === 1, 'ended should auto-advance');
+
+    await page.setInputFiles('#fileInput', [wavFile('third.wav')]);
+    s = await playerState(page);
+    assert(s.rows.length === 3 && s.rows[2] === '03 third' && s.current === 1, 'adding should append without jumping: ' + JSON.stringify(s));
+
+    await page.click('#clearBtn');
+    s = await playerState(page);
+    assert(s.rows.length === 0 && s.audioHidden && s.controlsHidden && s.src === '', 'CLEAR should reset: ' + JSON.stringify(s));
+    assert(s.status === 'NO FILES LOADED', 'status after clear: ' + s.status);
+    assert(errors.length === 0, 'console errors: ' + errors.join(' | '));
+}));
+
+test('music:bad-file', () => withPage('music', {}, async ({ page }) => {
+    await page.setInputFiles('#fileInput', [{ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') }]);
+    let s = await playerState(page);
+    assert(s.rows.length === 0, 'non-audio file should not be queued');
+    assert(s.note === "CAN'T PLAY: notes.txt", 'note: ' + s.note);
+
+    await page.setInputFiles('#fileInput', [
+        { name: 'broken.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('definitely not audio'.repeat(50)) },
+        wavFile('good.wav'),
+    ]);
+    await page.waitForFunction(() => document.querySelector('#queue li:nth-child(2) .queue-item')?.getAttribute('aria-current') === 'true', null, { timeout: 5000 });
+    s = await playerState(page);
+    assert(s.errors[0] && !s.errors[1], 'broken track should be marked: ' + JSON.stringify(s.errors));
+    assert(s.note === "CAN'T PLAY: broken", 'note: ' + s.note);
+}));
+
+test('music:drop', () => withPage('music', {}, async ({ page }) => {
+    const r = await page.evaluate(() => {
+        const zone = document.querySelector('.dropzone');
+        const dt = new DataTransfer();
+        dt.items.add(new File([new Uint8Array(64)], 'dropped.wav', { type: 'audio/wav' }));
+        zone.dispatchEvent(new DragEvent('dragenter', { dataTransfer: dt, bubbles: true, cancelable: true }));
+        const over = zone.classList.contains('is-dragover');
+        zone.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+        return { over, after: zone.classList.contains('is-dragover') };
+    });
+    assert(r.over && !r.after, 'dragover state should toggle: ' + JSON.stringify(r));
+    const s = await playerState(page);
+    assert(JSON.stringify(s.rows) === '["01 dropped"]', 'dropped rows: ' + JSON.stringify(s.rows));
+}));
+
+test('music:long-name-mobile', () => withPage('music', { width: 375 }, async ({ page }) => {
+    await page.setInputFiles('#fileInput', [wavFile('an_extremely_long_file_name_without_any_spaces_at_all_from_a_daw_bounce_final_v12.wav')]);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    assert(overflow <= 0, `horizontal overflow of ${overflow}px with a long file name`);
 }));
 
 test('bi:today', () => withPage('bi', { fixedTime: '2026-09-29T18:00:00Z' /* a Tuesday */ }, async ({ page }) => {
@@ -339,7 +448,7 @@ test('bi:today', () => withPage('bi', { fixedTime: '2026-09-29T18:00:00Z' /* a T
     assert(r.border === '2px', 'artwork frame: ' + r.border);
 }));
 
-test('focus:audio-error', () => withPage('music', {
+test('focus:audio-error', () => withPage('bi', {
     route: ['**/*.mp3', route => route.fulfill({ status: 404, body: '' })],
 }, async ({ page }) => {
     await page.waitForFunction(() => {
@@ -501,6 +610,7 @@ test('focus:type-case', () => withPage('type', {}, async ({ page }) => {
 // ---- Task 7: Time Machine + 404 ----
 shellTests('tm');
 shellTests('notfound');
+shellTests('v3');
 
 test('tm:rows', () => withPage('tm', {}, async ({ page }) => {
     const rows = await page.$$eval('.index-row', els => els.map(e => [
@@ -643,6 +753,24 @@ test('audit:og-image', () => withPage('index', {}, async ({ page }) => {
     const src = await page.getAttribute('meta[property="og:image"]', 'content');
     assert(src.endsWith('/images/og.png') && existsSync(path.join(ROOT, 'images', 'og.png')), 'og:image missing: ' + src);
 }));
+
+for (const [key, file] of Object.entries(PAGES).filter(([k]) => k !== 'notfound')) {
+    test(`release:meta:${key}`, () => {
+        const html = readFileSync(path.join(ROOT, decodeURIComponent(file)), 'utf8');
+        const url = 'https://bus10.github.io/' + (key === 'index' ? '' : file);
+        for (const sel of ['name="description"', 'property="og:title"', 'property="og:description"', 'property="og:image"', 'name="twitter:card"'])
+            assert(html.includes(`<meta ${sel}`), `${file}: missing ${sel}`);
+        assert(html.includes(`<meta property="og:url" content="${url}">`), `${file}: og:url is not ${url}`);
+        assert(html.includes(`<link rel="canonical" href="${url}">`), `${file}: canonical is not ${url}`);
+        const img = html.match(/property="og:image" content="https:\/\/bus10\.github\.io\/([^"]+)"/)[1];
+        assert(existsSync(path.join(ROOT, decodeURIComponent(img))), `${file}: og:image file missing: ${img}`);
+    });
+}
+
+test('release:meta:notfound', () => {
+    const html = readFileSync(path.join(ROOT, '404.html'), 'utf8');
+    assert(html.includes('<meta name="description"') && html.includes('<meta name="robots" content="noindex">'), '404 needs description + noindex');
+});
 
 for (const key of ['index', 'snake']) {
     test(`audit:touch-targets:${key}`, () => withPage(key, { width: 375, touch: true }, async ({ page }) => {

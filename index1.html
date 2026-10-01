@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Can U Be</title>
+    <meta name="description" content="Play your own audio files in a brutalist black-and-white music player by @bus0.">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://bus10.github.io/index1.html">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Can U Be – Music Player">
+    <meta property="og:description" content="Play your own audio files in the CAN U BE music player.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bus10.github.io/index1.html">
+    <meta property="og:image" content="https://bus10.github.io/images/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="CAN U BE in white condensed capitals on black">
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bus10.github.io/images/og.png">
+    <meta name="twitter:title" content="Can U Be – Music Player">
+    <meta name="twitter:description" content="Play your own audio files in the CAN U BE music player.">
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <script>try{if(localStorage.getItem('theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,11 +43,28 @@
             <p class="meta">01 / MUSIC PLAYER</p>
         </div>
 
-        <p class="loading" id="loading" role="status">LOADING<span class="loading-bar" aria-hidden="true"></span></p>
-        <audio controls id="audioPlayer">
-            <source src="audio/canube.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
+        <div class="player">
+            <label class="dropzone" id="dropzone">
+                <input type="file" id="fileInput" accept="audio/*" multiple>
+                <span class="dropzone-cta">[+ ADD FILES]</span>
+                <span class="dropzone-hint">OR DROP AUDIO HERE · PLAYS IN YOUR BROWSER, NOTHING IS UPLOADED</span>
+            </label>
+
+            <p class="player-status" id="playerStatus" role="status">NO FILES LOADED</p>
+            <p class="player-note" id="playerNote" role="alert" hidden></p>
+
+            <audio controls id="audioPlayer" hidden>
+                Your browser does not support the audio element.
+            </audio>
+
+            <div class="btn-row" id="playerControls" hidden>
+                <button class="btn" type="button" id="prevBtn">[PREV]</button>
+                <button class="btn" type="button" id="nextBtn">[NEXT]</button>
+                <button class="btn" type="button" id="clearBtn">[CLEAR]</button>
+            </div>
+
+            <ol class="queue" id="queue"></ol>
+        </div>
     </main>
 
     <footer class="ticker marquee" aria-label="Website made by @bus0">
@@ -39,7 +73,116 @@
 
     <script src="site.js"></script>
     <script>
-        watchAudio(document.getElementById('audioPlayer'), document.getElementById('loading'));
+        // Local-file player: tracks are object URLs for files the visitor picks or drops.
+        // Nothing is uploaded or saved; the queue is gone on reload.
+        const fileInput = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const audio = document.getElementById('audioPlayer');
+        const queueEl = document.getElementById('queue');
+        const statusEl = document.getElementById('playerStatus');
+        const noteEl = document.getElementById('playerNote');
+        const controls = document.getElementById('playerControls');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        let tracks = []; // { name, url, failed }
+        let current = -1;
+
+        const pad = n => String(n).padStart(2, '0');
+        const isAudio = file => !file.type || file.type.startsWith('audio/'); // some OSes leave type blank
+
+        function note(text) {
+            noteEl.textContent = text;
+            noteEl.hidden = !text;
+        }
+
+        function render() {
+            const empty = tracks.length === 0;
+            audio.hidden = empty;
+            controls.hidden = empty;
+            prevBtn.disabled = current <= 0;
+            nextBtn.disabled = current >= tracks.length - 1;
+            statusEl.textContent = current >= 0 ? 'NOW PLAYING: ' + tracks[current].name : 'NO FILES LOADED';
+
+            queueEl.replaceChildren(...tracks.map((track, i) => {
+                const li = document.createElement('li');
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'queue-item' + (track.failed ? ' is-error' : '');
+                if (i === current) btn.setAttribute('aria-current', 'true');
+                const num = document.createElement('span');
+                num.className = 'queue-num';
+                num.textContent = pad(i + 1);
+                const name = document.createElement('span');
+                name.className = 'queue-name';
+                name.textContent = track.name;
+                btn.append(num, name);
+                btn.addEventListener('click', () => play(i));
+                li.append(btn);
+                return li;
+            }));
+        }
+
+        function play(i) {
+            if (i < 0 || i >= tracks.length) return;
+            current = i;
+            audio.src = tracks[i].url;
+            audio.play().catch(() => {}); // autoplay may be refused; the controls still work
+            render();
+        }
+
+        function addFiles(files) {
+            const rejected = [];
+            files.forEach(file => {
+                if (!isAudio(file)) { rejected.push(file.name); return; }
+                tracks.push({ name: file.name.replace(/\.[^.]+$/, ''), url: URL.createObjectURL(file), failed: false });
+            });
+            note(rejected.length ? "CAN'T PLAY: " + rejected.join(', ') : '');
+            if (current === -1 && tracks.length) play(0);
+            else render();
+        }
+
+        function clearQueue() {
+            tracks.forEach(track => URL.revokeObjectURL(track.url));
+            tracks = [];
+            current = -1;
+            audio.pause();
+            audio.removeAttribute('src');
+            audio.load();
+            note('');
+            render();
+        }
+
+        audio.addEventListener('ended', () => { if (current < tracks.length - 1) play(current + 1); });
+        audio.addEventListener('error', () => {
+            if (current < 0 || !audio.getAttribute('src')) return;
+            tracks[current].failed = true;
+            note("CAN'T PLAY: " + tracks[current].name);
+            if (current < tracks.length - 1) play(current + 1);
+            else render();
+        });
+
+        prevBtn.addEventListener('click', () => play(current - 1));
+        nextBtn.addEventListener('click', () => play(current + 1));
+        document.getElementById('clearBtn').addEventListener('click', clearQueue);
+
+        fileInput.addEventListener('change', () => {
+            addFiles([...fileInput.files]);
+            fileInput.value = ''; // allow re-adding the same file
+        });
+
+        ['dragenter', 'dragover'].forEach(type => dropzone.addEventListener(type, e => {
+            e.preventDefault();
+            dropzone.classList.add('is-dragover');
+        }));
+        dropzone.addEventListener('dragleave', e => {
+            if (!dropzone.contains(e.relatedTarget)) dropzone.classList.remove('is-dragover');
+        });
+        dropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropzone.classList.remove('is-dragover');
+            addFiles([...e.dataTransfer.files]);
+        });
     </script>
 </body>
 </html>

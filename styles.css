@@ -500,6 +500,118 @@ h1 {
     margin-top: var(--s3);
 }
 
+/* ---- Upload player ---- */
+.player {
+    max-width: 560px;
+}
+
+.dropzone {
+    display: block;
+    padding: var(--s5) var(--s3);
+    border: var(--rule) dashed var(--border-color);
+    text-align: center;
+    cursor: pointer;
+}
+
+.dropzone input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.dropzone:has(input:focus-visible) {
+    outline: 2px dashed var(--border-color);
+    outline-offset: 3px;
+}
+
+.dropzone.is-dragover {
+    border-style: solid;
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+@media (hover: hover) {
+    .dropzone:hover {
+        border-style: solid;
+        background: var(--text-color);
+        color: var(--bg-color);
+    }
+}
+
+.dropzone-cta {
+    display: block;
+    font-weight: 700;
+}
+
+.dropzone-hint {
+    display: block;
+    margin-top: var(--s2);
+    font-size: 0.6875rem; /* 11px */
+    opacity: var(--muted);
+}
+
+.player-status {
+    margin-top: var(--s4);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.player-note {
+    margin-top: var(--s2);
+    font-size: 0.6875rem; /* 11px */
+    overflow-wrap: anywhere;
+}
+
+.queue {
+    list-style: none;
+    border-top: var(--rule) solid var(--border-color);
+}
+
+.queue:empty {
+    display: none;
+}
+
+.queue-item {
+    display: flex;
+    gap: var(--s3);
+    width: 100%;
+    min-height: 44px;
+    padding: var(--s2) var(--s2);
+    border-bottom: var(--rule) solid var(--border-color);
+    text-align: left;
+}
+
+.queue-item[aria-current="true"] {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+@media (hover: hover) {
+    .queue-item:hover {
+        background: var(--text-color);
+        color: var(--bg-color);
+    }
+}
+
+.queue-item.is-error .queue-name {
+    opacity: var(--muted);
+    text-decoration: line-through;
+}
+
+.queue-num {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+}
+
+.queue-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-transform: none;
+}
+
 /* ---- Busify ---- */
 .band {
     margin: 0 0 var(--s4);
@@ -637,4 +749,25 @@ h1 {
         padding: var(--s3);
         font-size: 1rem;
     }
+}
+
+/* ---- V3 note ---- */
+.letter {
+    max-width: 62ch;
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.7;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.letter p + p {
+    margin-top: var(--s4);
+}
+
+.letter-sign {
+    padding-top: var(--s3);
+}
+
+.letter + .btn-row {
+    margin-top: var(--s5);
 }
