@@ -71,6 +71,33 @@
         }
 
         /**
+         * Styles for the file picker and the note about the removed song.
+         */
+        #fileInput {
+            display: block;
+            margin: 12px auto 0;
+            color: white;
+        }
+        .song-note {
+            font-size: 13px;
+            max-width: 320px;
+            margin: 12px auto 0;
+            opacity: 0;
+        }
+        .container:hover .song-note,
+        .container:focus-within .song-note {
+            opacity: 1;
+        }
+        @media (hover: none) {
+            .song-note {
+                opacity: 1;
+            }
+        }
+        .song-note a {
+            color: white;
+        }
+
+        /**
          * Media query for small screens.
          *
          * Adjusts the font size of the h1 element and the size of the loader element.
@@ -153,9 +180,10 @@
         <h1>Can U Be</h1>
         <!-- Added preload="auto" to ensure the audio loads as soon as possible -->
         <audio controls preload="auto">
-            <source src="canube.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
+        <input type="file" id="fileInput" accept="audio/*" aria-label="Choose your own audio">
+        <p class="song-note">The original song has been removed. <a href="../../v3.html">Read why</a>. Choose your own audio to play it here.</p>
         <h3>for bradley</h3>
     </div>
     <script>
@@ -179,6 +207,15 @@
         audio.addEventListener('canplaythrough', function() {
             loader.style.display = 'none';
             container.style.display = 'block';
+        });
+
+        // The original song was removed; play a file the visitor picks instead
+        document.getElementById('fileInput').addEventListener('change', function() {
+            var file = this.files[0];
+            if (!file) return;
+            if (audio.src) URL.revokeObjectURL(audio.src);
+            audio.src = URL.createObjectURL(file);
+            audio.play();
         });
 
         // Ensure the container is displayed if the document is fully loaded before the audio

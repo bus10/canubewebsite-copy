@@ -657,9 +657,36 @@ test('cleanup:sitemap', async () => {
     }
 });
 
+// Snapshots stay frozen, except V1/V2 index.html, which swap the removed song for a file picker
 test('archive:untouched', async () => {
-    execSync('git diff --quiet 12364c0 -- time-machine', { cwd: ROOT });
+    execSync("git diff --quiet 12364c0 -- time-machine ':!time-machine/CUB-V1/index.html' ':!time-machine/CUB-V2/index.html' ':!time-machine/*/canube.mp3'", { cwd: ROOT });
 });
+
+test('archive:song-removed', async () => {
+    for (const f of ['audio/canube.mp3', 'time-machine/CUB-V1/canube.mp3', 'time-machine/CUB-V2/canube.mp3']) {
+        assert(!existsSync(path.join(ROOT, f)), f + ' still exists');
+    }
+});
+
+for (const v of ['CUB-V1', 'CUB-V2']) {
+    test(`archive:${v}-picker`, () => withPage(null, { url: `${BASE}time-machine/${v}/index.html` }, async ({ page, errors, requests }) => {
+        assert(!requests.some(u => u.endsWith('.mp3')), 'still requests an mp3: ' + requests.filter(u => u.endsWith('.mp3')));
+        assert(await page.isVisible('.container'), 'container hidden without the song');
+        assert(await page.getAttribute('.song-note a', 'href') === '../../v3.html', 'note must link to v3.html');
+        const noteOpacity = () => page.$eval('.song-note', e => getComputedStyle(e).opacity);
+        await page.mouse.move(5, 795);
+        assert(await noteOpacity() === '0', 'note should be hidden until hover');
+        await page.hover('.container h1');
+        assert(await noteOpacity() === '1', 'note should show on hover');
+        await page.setInputFiles('#fileInput', wavFile('mine.wav'));
+        await page.waitForFunction(() => document.querySelector('audio').src.startsWith('blob:'));
+        assert(errors.length === 0, 'page errors: ' + errors.join(' | '));
+    }));
+    test(`archive:${v}-note-touch`, () => withPage(null, { url: `${BASE}time-machine/${v}/index.html`, width: 375, touch: true }, async ({ page }) => {
+        const opacity = await page.$eval('.song-note', e => getComputedStyle(e).opacity);
+        assert(opacity === '1', 'note must stay visible on touch devices (no hover)');
+    }));
+}
 
 // ---- Final review fixes ----
 test('review:scramble-no-shift', () => withPage('type', { width: 375 }, async ({ page }) => {

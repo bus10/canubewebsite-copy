@@ -25,6 +25,29 @@
             margin-top: 20px;
             outline: none;
         }
+        #fileInput {
+            display: block;
+            margin: 12px auto 0;
+            color: white;
+        }
+        .song-note {
+            font-size: 13px;
+            max-width: 320px;
+            margin: 12px auto 0;
+            opacity: 0;
+        }
+        .container:hover .song-note,
+        .container:focus-within .song-note {
+            opacity: 1;
+        }
+        @media (hover: none) {
+            .song-note {
+                opacity: 1;
+            }
+        }
+        .song-note a {
+            color: white;
+        }
         .back-to-timemachine {
             position: fixed !important;
             top: 20px !important;
@@ -58,10 +81,21 @@
     <div class="container">
         <h1>Can U Be</h1>
         <audio controls>
-            <source src="canube.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
+        <input type="file" id="fileInput" accept="audio/*" aria-label="Choose your own audio">
+        <p class="song-note">The original song has been removed. <a href="../../v3.html">Read why</a>. Choose your own audio to play it here.</p>
         <h3>Website made by @bus0</h3>
     </div>
+    <script>
+        var audio = document.querySelector('audio');
+        document.getElementById('fileInput').addEventListener('change', function() {
+            var file = this.files[0];
+            if (!file) return;
+            if (audio.src) URL.revokeObjectURL(audio.src);
+            audio.src = URL.createObjectURL(file);
+            audio.play();
+        });
+    </script>
 </body>
 </html>
