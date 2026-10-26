@@ -472,19 +472,19 @@ shellTests('busify');
 const countdownValues = page => page.$$eval('#countdown .stat-value', els => els.map(e => e.textContent.trim()));
 const bandText = page => page.textContent('#launchBand .marquee-track');
 
-test('busify:countdown', () => withPage('busify', { fixedTime: '2026-10-29T05:59:30Z' }, async ({ page }) => {
+test('busify:countdown', () => withPage('busify', { fixedTime: '2026-12-23T05:59:30Z' }, async ({ page }) => {
     await page.waitForTimeout(200);
     const values = await countdownValues(page);
-    // 2026-10-31T07:00:00Z − 2026-10-29T05:59:30Z = 2d 1h 0m 30s
+    // 2026-12-25T07:00:00Z − 2026-12-23T05:59:30Z = 2d 1h 0m 30s
     assert(JSON.stringify(values) === '["02","01","00","30"]', 'countdown: ' + JSON.stringify(values));
     const labels = await page.$$eval('#countdown .stat-label', els => els.map(e => e.textContent.trim()));
     assert(JSON.stringify(labels) === '["DAYS","HRS","MIN","SEC"]', 'labels: ' + JSON.stringify(labels));
-    assert((await bandText(page)).includes('LAUNCHING 10.31.26'), 'band missing launch text');
+    assert((await bandText(page)).includes('LAUNCHING 12.25.26'), 'band missing launch text');
     const desc = await page.getAttribute('meta[name="description"]', 'content');
-    assert(desc.includes('October 31, 2026'), 'meta description not updated: ' + desc);
+    assert(desc.includes('December 25, 2026'), 'meta description not updated: ' + desc);
 }));
 
-test('busify:live', () => withPage('busify', { fixedTime: '2026-11-01T00:00:00Z' }, async ({ page }) => {
+test('busify:live', () => withPage('busify', { fixedTime: '2026-12-26T00:00:00Z' }, async ({ page }) => {
     await page.waitForTimeout(200);
     assert(JSON.stringify(await countdownValues(page)) === '["00","00","00","00"]', 'expired digits not 00');
     const text = await bandText(page);
