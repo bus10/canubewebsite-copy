@@ -1,0 +1,14 @@
+# Repo/dev files that live next to the site but must not be served.
+.git
+.github
+.gitignore
+.assetsignore
+.DS_Store
+.wrangler
+.impeccable
+.superpowers
+node_modules
+tools
+docs
+CLAUDE.md
+wrangler.jsonc

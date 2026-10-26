@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-"Can U Be" (@bus0) is a static personal website hosted on GitHub Pages at `https://bus10.github.io/`. It's a brutalist-style playground: a landing page linking to a music player, a podcast teaser, a couple of browser games, a typing test, and an archived "time machine" of old site versions.
+"Can U Be" (@bus0) is a static personal website hosted on Cloudflare (Workers Static Assets) at `https://canube.com/`. It's a brutalist-style playground: a landing page linking to a music player, a podcast teaser, a couple of browser games, a typing test, and an archived "time machine" of old site versions.
 
 There is no build system, bundler, or backend — every page is a standalone `.html` file sharing `styles.css` and `site.js`, deployed as-is. The only package manifest is the dev-only verification harness in `tools/`.
 
@@ -12,7 +12,7 @@ There is no build system, bundler, or backend — every page is a standalone `.h
 
 - **Preview**: `node tools/check.mjs --serve` serves the repo root at `http://127.0.0.1:8765/` (any static server works; `python3 -m http.server` cannot bind on this machine). No compile/build step. `404.html` uses root-absolute paths, so it only renders correctly when served from the site root.
 - **Verification**: `tools/check.mjs` is a Playwright suite (dev-only; `tools/` has its own `package.json`, the site itself has none). First time: `cd tools && npm install && npx playwright install chromium`. It starts its own local server, so just run `node tools/check.mjs` (all), `node tools/check.mjs shell:snake theme:` (by name prefix), or `node tools/check.mjs --shots` (screenshots of every page at 1280/375 in both themes into gitignored `tools/shots/`). Needs network for Google Fonts.
-- **Deployment**: pushing to `main` on GitHub Pages is the deploy mechanism (site root is repo root, per `sitemap.xml`/`robots.txt` referencing `https://bus10.github.io/`).
+- **Deployment**: pushing to `main` deploys via Cloudflare Workers Builds, configured by `wrangler.jsonc` (static-assets-only Worker, no script; custom domain `canube.com`). The repo root is the asset directory, so anything that must not be public (dev tooling, docs, config) has to be listed in `.assetsignore`. `html_handling` is `auto-trailing-slash`: `/foo.html` 307-redirects to `/foo` and `dir/index.html` serves at `/dir/`, so canonical/`og:url`/`sitemap.xml` URLs use those clean forms (`release:meta:` checks enforce it). Internal links keep `.html` so the local preview server still works. `npx wrangler dev` previews the real Cloudflare routing; `npx wrangler deploy --dry-run` validates the config.
 
 ## Architecture & Conventions
 

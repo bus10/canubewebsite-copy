@@ -1,0 +1,13 @@
+{
+	"$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
+	"name": "canube",
+	"compatibility_date": "2026-10-26",
+	"routes": [{ "pattern": "canube.com", "custom_domain": true }],
+	// Static-only Worker: no script, the repo root is served as-is.
+	// Files that must not be public are listed in .assetsignore.
+	"assets": {
+		"directory": ".",
+		"not_found_handling": "404-page",
+		"html_handling": "auto-trailing-slash"
+	}
+}

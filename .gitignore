@@ -15,3 +15,6 @@ audio/*.wav
 
 # Verification screenshots (tools/check.mjs --shots)
 tools/shots/
+
+# Wrangler local state
+.wrangler/

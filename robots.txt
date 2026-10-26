@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 # Updated sitemap location
-Sitemap: https://bus10.github.io/sitemap.xml
+Sitemap: https://canube.com/sitemap.xml

@@ -1,80 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://bus10.github.io/</loc>
-        <lastmod>2026-10-01</lastmod>
+        <loc>https://canube.com/</loc>
+        <lastmod>2026-10-26</lastmod>
         <changefreq>monthly</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/v3.html</loc>
-        <lastmod>2026-10-01</lastmod>
+        <loc>https://canube.com/v3</loc>
+        <lastmod>2026-10-26</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/index1.html</loc>
-        <lastmod>2026-10-01</lastmod>
+        <loc>https://canube.com/index1</loc>
+        <lastmod>2026-10-26</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/benevolent-inequality.html</loc>
-        <lastmod>2026-09-28</lastmod>
+        <loc>https://canube.com/benevolent-inequality</loc>
+        <lastmod>2026-10-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/busify.html</loc>
-        <lastmod>2026-09-28</lastmod>
+        <loc>https://canube.com/busify</loc>
+        <lastmod>2026-10-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/snake.html</loc>
-        <lastmod>2026-09-28</lastmod>
+        <loc>https://canube.com/snake</loc>
+        <lastmod>2026-10-26</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/plinko.html</loc>
-        <lastmod>2026-09-28</lastmod>
+        <loc>https://canube.com/plinko</loc>
+        <lastmod>2026-10-26</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/tictactoe.html</loc>
-        <lastmod>2026-09-28</lastmod>
+        <loc>https://canube.com/tictactoe</loc>
+        <lastmod>2026-10-26</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/type%20speed%20test/index.html</loc>
-        <lastmod>2026-09-28</lastmod>
+        <loc>https://canube.com/type%20speed%20test/</loc>
+        <lastmod>2026-10-26</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/time-machine.html</loc>
-        <lastmod>2026-09-28</lastmod>
+        <loc>https://canube.com/time-machine</loc>
+        <lastmod>2026-10-26</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>
     </url>
     <!-- Archived versions -->
     <url>
-        <loc>https://bus10.github.io/time-machine/CUB-V1/index.html</loc>
+        <loc>https://canube.com/time-machine/CUB-V1/</loc>
         <lastmod>2024-08-01</lastmod>
         <changefreq>never</changefreq>
         <priority>0.3</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/time-machine/CUB-V2/index.html</loc>
+        <loc>https://canube.com/time-machine/CUB-V2/</loc>
         <lastmod>2024-09-01</lastmod>
         <changefreq>never</changefreq>
         <priority>0.3</priority>
     </url>
     <url>
-        <loc>https://bus10.github.io/time-machine/CUB-V3/index.html</loc>
+        <loc>https://canube.com/time-machine/CUB-V3/</loc>
         <lastmod>2024-10-01</lastmod>
         <changefreq>never</changefreq>
         <priority>0.3</priority>

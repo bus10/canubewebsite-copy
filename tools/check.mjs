@@ -784,12 +784,13 @@ test('audit:og-image', () => withPage('index', {}, async ({ page }) => {
 for (const [key, file] of Object.entries(PAGES).filter(([k]) => k !== 'notfound')) {
     test(`release:meta:${key}`, () => {
         const html = readFileSync(path.join(ROOT, decodeURIComponent(file)), 'utf8');
-        const url = 'https://bus10.github.io/' + (key === 'index' ? '' : file);
+        // Cloudflare serves clean URLs: foo.html -> /foo, dir/index.html -> /dir/
+        const url = 'https://canube.com/' + (key === 'index' ? '' : file.replace(/index\.html$/, '').replace(/\.html$/, ''));
         for (const sel of ['name="description"', 'property="og:title"', 'property="og:description"', 'property="og:image"', 'name="twitter:card"'])
             assert(html.includes(`<meta ${sel}`), `${file}: missing ${sel}`);
         assert(html.includes(`<meta property="og:url" content="${url}">`), `${file}: og:url is not ${url}`);
         assert(html.includes(`<link rel="canonical" href="${url}">`), `${file}: canonical is not ${url}`);
-        const img = html.match(/property="og:image" content="https:\/\/bus10\.github\.io\/([^"]+)"/)[1];
+        const img = html.match(/property="og:image" content="https:\/\/canube\.com\/([^"]+)"/)[1];
         assert(existsSync(path.join(ROOT, decodeURIComponent(img))), `${file}: og:image file missing: ${img}`);
     });
 }
